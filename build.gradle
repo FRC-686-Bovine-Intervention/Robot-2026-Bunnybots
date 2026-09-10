@@ -4,7 +4,6 @@ plugins {
 	id "com.gradleup.shadow" version "9.3.0"
 
 	id "com.diffplug.spotless" version "6.25.0"
-	id "io.freefair.lombok" version "8.4"
 }
 
 java {
@@ -120,7 +119,6 @@ deployArtifact.jarTask = shadowJar
 wpi.java.configureExecutableTasks(shadowJar)
 wpi.java.configureTestTasks(test)
 
-// Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
 	options.compilerArgs.add '-XDstringConcat=inline'
 }
@@ -137,13 +135,13 @@ repositories {
 }
 
 // Check constants for pull request
-task checkConstantsPullRequest(dependsOn: "classes", type: JavaExec) {
+task(checkConstantsPullRequest, dependsOn: "classes", type: JavaExec) {
 	mainClass = "first.robot.constants.CheckPullRequest"
 	classpath = sourceSets.main.runtimeClasspath
 }
 
 // Create commit with working changes on event branches
-task eventDeploy {
+task(eventDeploy) {
 	doLast {
 		if (project.gradle.startParameter.taskNames.any({ it.toLowerCase().contains("deploy") })) {
 			def branchPrefix = "event"
@@ -173,7 +171,6 @@ task eventDeploy {
 		}
 	}
 }
-
 // Spotless formatting
 project.compileJava.dependsOn(spotlessApply)
 spotless {
