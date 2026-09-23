@@ -1,6 +1,6 @@
 package first.util.mechanismUtil;
 
-import org.wpilib.driverstation.Alert;
+import org.wpilib.util.Alert;
 
 public class Fault {
 	private final Alert activeAlert;

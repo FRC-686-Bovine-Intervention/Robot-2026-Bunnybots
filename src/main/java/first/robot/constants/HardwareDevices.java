@@ -1,5 +1,7 @@
 package first.robot.constants;
 
+import org.wpilib.hardware.bus.CANPort;
+
 import first.util.hardwareID.can.CANBus;
 import first.util.hardwareID.can.CANDevice;
 
@@ -19,13 +21,13 @@ public class HardwareDevices {
 	 * 22: BL Azimuth         1: BR Azimuth
 	 * 23: BL Drive           0: BR Drive
 	 */
-	public static final CANBus busOne =   CANBus.systemcoreBus(0);
-	public static final CANBus busTwo =   CANBus.systemcoreBus(1);
-	public static final CANBus busThree = CANBus.systemcoreBus(2);
-	public static final CANBus busFour =  CANBus.systemcoreBus(3);
-	public static final CANBus busFive =  CANBus.systemcoreBus(4);
+	public static final CANBus busOne =   CANBus.port(CANPort.CAN_S0);
+	public static final CANBus busTwo =   CANBus.port(CANPort.CAN_S1);
+	public static final CANBus busThree = CANBus.port(CANPort.CAN_S2);
+	public static final CANBus busFour =  CANBus.port(CANPort.CAN_S3);
+	public static final CANBus busFive =  CANBus.port(CANPort.CAN_S4);
 
-	public static final CANBus canivore = CANBus.canivore("canivore");
+	// public static final CANBus canivore = CANivoreBus.name("canivore");
 
 	// Drive
 	public static final CANDevice pigeonID = busFive.id(0);
