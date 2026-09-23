@@ -2,7 +2,7 @@ package first.util.faults;
 
 import java.util.Arrays;
 
-import org.wpilib.driverstation.Alert;
+import org.wpilib.util.Alert;
 
 import first.util.faults.DeviceFaults.FaultType;
 

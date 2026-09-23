@@ -20,8 +20,6 @@ public class CANDevice {
 	public static CANDevice id(int id, CANBus bus) {
 		return new CANDevice(id, bus);
 	}
-
-	// CTRE
 	// | Phoenix 6
 	public TalonFX talonFX() {
 		return new TalonFX(id, bus.getPhoenix());
@@ -40,6 +38,6 @@ public class CANDevice {
 	}
 	// REV
 	public SparkMax sparkMax(MotorType motorType) {
-		return new SparkMax(bus.index, id, motorType);
+		return new SparkMax(bus.port, id, motorType);
 	}
 }

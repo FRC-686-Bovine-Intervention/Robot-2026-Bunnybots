@@ -7,13 +7,13 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
-import org.wpilib.driverstation.Alert;
 import org.wpilib.driverstation.RobotState;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.networktables.PubSubOption;
 import org.wpilib.networktables.StringArrayPublisher;
 import org.wpilib.networktables.StringEntry;
 import org.wpilib.networktables.StringPublisher;
+import org.wpilib.util.Alert;
 
 public enum Environment {
 	Practice,
@@ -45,9 +45,9 @@ public enum Environment {
 	private static String selectedName;
 	private static Environment selectedValue;
 
-	private static final Alert fms_alert = new Alert("FMS detected, Competition Environment selected", Alert.Level.LOW);
-	private static final Alert fms_no_comp_alert = new Alert("FMS detected but selected Environment is not Competition", Alert.Level.MEDIUM);
-	private static final Alert demo_alert = new Alert("Demo Environment selected, Robot functionality restricted", Alert.Level.MEDIUM);
+	private static final Alert fms_alert = new Alert("Environment/FMS Alert", "FMS detected, Competition Environment selected", Alert.Level.LOW);
+	private static final Alert fms_no_comp_alert = new Alert("Environment/FMS No Comp Alert", "FMS detected but selected Environment is not Competition", Alert.Level.MEDIUM);
+	private static final Alert demo_alert = new Alert("Environment/Demo Alert", "Demo Environment selected, Robot functionality restricted", Alert.Level.MEDIUM);
 
 	static {
 		var practiceName = "Practice";

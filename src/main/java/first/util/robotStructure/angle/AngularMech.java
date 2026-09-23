@@ -23,6 +23,6 @@ public class AngularMech extends Mechanism3d<AngleUnit> {
 	}
 
 	public void setRads(double angleRads) {
-		this.transform = new Transform3d(Translation3d.kZero, new Rotation3d(axis, angleRads));
+		this.transform = new Transform3d(Translation3d.ZERO, new Rotation3d(axis, angleRads));
 	}
 }

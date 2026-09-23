@@ -5,7 +5,7 @@ import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Transform3d;
 
 public class Root implements Component {
-	private Pose3d pose = Pose3d.kZero;
+	private Pose3d pose = Pose3d.ZERO;
 
 	public void setPose(Pose2d pose) {
 		this.setPose(new Pose3d(pose));
@@ -16,7 +16,7 @@ public class Root implements Component {
 
 	@Override
 	public Transform3d getRobotRelative() {
-		return Transform3d.kZero;
+		return Transform3d.ZERO;
 	}
 
 	@Override

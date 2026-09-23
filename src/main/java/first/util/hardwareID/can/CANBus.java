@@ -1,25 +1,18 @@
 package first.util.hardwareID.can;
 
+import org.wpilib.hardware.bus.CANPort;
+
 public class CANBus {
-	public final int index;
+	public final CANPort port;
 	private final com.ctre.phoenix6.CANBus phoenixBus;
 
-	private CANBus(int index) {
-		this.index = index;
-		this.phoenixBus = com.ctre.phoenix6.CANBus.systemcore(index);
+	private CANBus(CANPort port) {
+		this.port = port;
+		this.phoenixBus = new com.ctre.phoenix6.CANBus(port);
 	}
 
-	private CANBus(String name) {
-		this.index = -1;
-		this.phoenixBus = new com.ctre.phoenix6.CANBus(name);
-	}
-
-	public static CANBus systemcoreBus(int index) {
-		return new CANBus(index);
-	}
-
-	public static CANBus canivore(String name) {
-		return new CANBus(name);
+	public static CANBus port(CANPort port) {
+		return new CANBus(port);
 	}
 
 	public CANDevice id(int id) {
