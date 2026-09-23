@@ -24,8 +24,8 @@ public class XboxController {
 		this.leftStick = new Joystick(this.hid::getLeftX, this.hid::getLeftY).invertY();
 		this.rightStick = new Joystick(this.hid::getRightX, this.hid::getRightY).invertY();
 
-		this.leftTrigger = new Axis(this.hid::getLeftTriggerAxis);
-		this.rightTrigger = new Axis(this.hid::getRightTriggerAxis);
+		this.leftTrigger = new Axis(this.hid::getLeftTrigger);
+		this.rightTrigger = new Axis(this.hid::getRightTrigger);
 
 		this.leftRumble = new RumbleSystem(name + "/Rumble/Left") {
 			@Override
@@ -41,33 +41,32 @@ public class XboxController {
 		};
 	}
 
-	public Trigger a()                {return new Trigger(this.hid.southFace(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger b()                {return new Trigger(this.hid.eastFace(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger x()                {return new Trigger(this.hid.westFace(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger y()                {return new Trigger(this.hid.northFace(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger a()                {return new Trigger(this.hid.faceDown(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger b()                {return new Trigger(this.hid.faceRight(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger x()                {return new Trigger(this.hid.faceLeft(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger y()                {return new Trigger(this.hid.faceUp(Scheduler.getDefault().getDefaultEventLoop()));}
 	public Trigger leftBumper()       {return new Trigger(this.hid.leftBumper(Scheduler.getDefault().getDefaultEventLoop()));}
 	public Trigger rightBumper()      {return new Trigger(this.hid.rightBumper(Scheduler.getDefault().getDefaultEventLoop()));}
 	public Trigger start()            {return new Trigger(this.hid.start(Scheduler.getDefault().getDefaultEventLoop()));}
 	public Trigger back()             {return new Trigger(this.hid.back(Scheduler.getDefault().getDefaultEventLoop()));}
 	public Trigger leftStickButton()  {return new Trigger(this.hid.leftStick(Scheduler.getDefault().getDefaultEventLoop()));}
 	public Trigger rightStickButton() {return new Trigger(this.hid.rightStick(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povCenter()        {return new Trigger(this.hid.povCenter(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povUp()            {return new Trigger(this.hid.povUp(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povUpRight()       {return new Trigger(this.hid.povUpRight(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povRight()         {return new Trigger(this.hid.povRight(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povDownRight()     {return new Trigger(this.hid.povDownRight(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povDown()          {return new Trigger(this.hid.povDown(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povDownLeft()      {return new Trigger(this.hid.povDownLeft(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povLeft()          {return new Trigger(this.hid.povLeft(Scheduler.getDefault().getDefaultEventLoop()));}
-	public Trigger povUpLeft()        {return new Trigger(this.hid.povUpLeft(Scheduler.getDefault().getDefaultEventLoop()));}
+	// public Trigger povCenter()        {return new Trigger(this.hid.d(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger povUp()            {return new Trigger(this.hid.dpadUp(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger povUpRight()       {return new Trigger(this.hid.dpadUp(Scheduler.getDefault().getDefaultEventLoop()).and(this.hid.dpadRight(Scheduler.getDefault().getDefaultEventLoop())));}
+	public Trigger povRight()         {return new Trigger(this.hid.dpadRight(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger povDownRight()     {return new Trigger(this.hid.dpadDown(Scheduler.getDefault().getDefaultEventLoop()).and(this.hid.dpadRight(Scheduler.getDefault().getDefaultEventLoop())));}
+	public Trigger povDown()          {return new Trigger(this.hid.dpadDown(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger povDownLeft()      {return new Trigger(this.hid.dpadDown(Scheduler.getDefault().getDefaultEventLoop()).and(this.hid.dpadLeft(Scheduler.getDefault().getDefaultEventLoop())));}
+	public Trigger povLeft()          {return new Trigger(this.hid.dpadLeft(Scheduler.getDefault().getDefaultEventLoop()));}
+	public Trigger povUpLeft()        {return new Trigger(this.hid.dpadUp(Scheduler.getDefault().getDefaultEventLoop()).and(this.hid.dpadLeft(Scheduler.getDefault().getDefaultEventLoop())));}
 
 	public boolean isConnected() {
 		return this.hid.isConnected();
 	}
 
-	public static abstract class RumbleSystem extends Mechanism {
+	public static abstract class RumbleSystem implements Mechanism {
 		public RumbleSystem(String name) {
-			super(name);
 		}
 
 		public abstract void setRumble(double rumble);

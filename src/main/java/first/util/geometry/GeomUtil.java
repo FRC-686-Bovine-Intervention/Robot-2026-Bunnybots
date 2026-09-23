@@ -26,8 +26,8 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.math.kinematics.ChassisVelocities;
 
 public class GeomUtil {
-	public static final Transform2d rotate180Transform2d = new Transform2d(Translation2d.kZero, Rotation2d.k180deg);
-	public static final Transform3d rotate180Transform3d = new Transform3d(Translation3d.kZero, new Rotation3d(Rotation2d.k180deg));
+	public static final Transform2d rotate180Transform2d = new Transform2d(Translation2d.ZERO, Rotation2d.k180deg);
+	public static final Transform3d rotate180Transform3d = new Transform3d(Translation3d.ZERO, new Rotation3d(Rotation2d.k180deg));
 
 	public static Transform3d toTransform3d(Pose3d pose) {
 		return new Transform3d(

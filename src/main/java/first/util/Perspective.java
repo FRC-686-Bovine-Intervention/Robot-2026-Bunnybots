@@ -7,7 +7,6 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-import org.wpilib.driverstation.Alert;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.linalg.Matrix;
 import org.wpilib.math.numbers.N2;
@@ -16,6 +15,7 @@ import org.wpilib.networktables.PubSubOption;
 import org.wpilib.networktables.StringArrayPublisher;
 import org.wpilib.networktables.StringEntry;
 import org.wpilib.networktables.StringPublisher;
+import org.wpilib.util.Alert;
 
 import first.util.flipping.AllianceFlipped;
 
@@ -42,11 +42,11 @@ public class Perspective {
 		return this.fieldToPerspective;
 	}
 
-	private static final Perspective posX = new Perspective(Rotation2d.kZero);
+	private static final Perspective posX = new Perspective(Rotation2d.ZERO);
 	private static final Perspective negX = new Perspective(Rotation2d.k180deg);
-	private static final Perspective posY = new Perspective(Rotation2d.kCCW_90deg);
-	private static final Perspective negY = new Perspective(Rotation2d.kCW_90deg);
-	private static final Perspective custom = new Perspective(Rotation2d.kZero) {
+	private static final Perspective posY = new Perspective(Rotation2d.CCW_90DEG);
+	private static final Perspective negY = new Perspective(Rotation2d.CW_90DEG);
+	private static final Perspective custom = new Perspective(Rotation2d.ZERO) {
 		private final LoggedNetworkNumber customDegrees = new LoggedNetworkNumber("SmartDashboard/Perspective/Custom", 0.0);
 
 		private boolean hasChanged() {
@@ -98,14 +98,14 @@ public class Perspective {
 	private static String selectedName;
 	private static Perspective selectedValue;
 
-	private static final Alert compNotAllianceAlert = new Alert("Competition Environment detected, but selected Perspective does not match the Alliance", Alert.Level.MEDIUM);
+	private static final Alert compNotAllianceAlert = new Alert("Perspective/Comp Not Alliance Alert", "Competition Environment detected, but selected Perspective does not match the Alliance", Alert.Level.MEDIUM);
 
 	static {
-		var posXName = "Blue Alliance (+X)";
-		var negXName = "Red Alliance (-X)";
-		var posYName = "Blue Left (+Y)";
-		var negYName = "Red Left (-Y)";
-		var customName = "Custom";
+		final var posXName = "Blue Alliance (+X)";
+		final var negXName = "Red Alliance (-X)";
+		final var posYName = "Blue Left (+Y)";
+		final var negYName = "Red Left (-Y)";
+		final var customName = "Custom";
 
 		alliancePerspectiveName = new AllianceFlipped<>(posXName, negXName);
 

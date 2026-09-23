@@ -13,7 +13,7 @@ import org.wpilib.units.Unit;
 public abstract class Mechanism3d<U extends Unit> extends ChildBase {
 	public static final String KEY = "Mechanism3d";
 	protected final Vector<N3> axis;
-	protected Transform3d transform = Transform3d.kZero;
+	protected Transform3d transform = Transform3d.ZERO;
 
 	private static Mechanism3d<?>[] mechanisms = new Mechanism3d[0];
 	public static void registerMechs(Mechanism3d<?>... mechs) {
