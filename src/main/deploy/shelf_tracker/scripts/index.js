@@ -54,7 +54,7 @@ const ntClient = new NT4_Client(
     } else if (topic.name === toDashboardPrefix + bakerModeTopicName) {
       bakerModeState = value;
     } else if (topic.name === toDashboardPrefix + priorityListTopicName) {
-      priorityListState = unpackInt(value, 24, 3);
+      priorityListState = unpackInt(value, 40, 4);
     } else if (topic.name === advantageKitPrefix + carrotScoreTargetTopicName) {
       carrotScoreTarget = value;
     } else if (topic.name === advantageKitPrefix + carrotCakeScoreTargetTopicName) {
@@ -333,12 +333,12 @@ window.addEventListener("load", () => {
   
   bind(ovenCarrotsDOM, () => {
     if (mode === "SMART") return;
-    ntClient.addSample(toRobotPrefix + carrotGoalTopicName, -1);
+    ntClient.addSample(toRobotPrefix + carrotGoalTopicName, 15);
   });
 
   bind(ovenCakesDOM, () => {
     if (mode === "SMART") return;
-    ntClient.addSample(toRobotPrefix + carrotCakeGoalTopicName, -1);
+    ntClient.addSample(toRobotPrefix + carrotCakeGoalTopicName, 15);
   })
 
   levelsDOM.forEach((levelDOM, level) => {
@@ -423,7 +423,7 @@ window.addEventListener("load", () => {
 
     ntClient.addSample(
       toRobotPrefix + priorityListTopicName,
-      filteredSwaps.map((swap) => packInt(swap, 3))
+      filteredSwaps.map((swap) => packInt(swap, 4))
     );
     swaps = [];
     priorityUpdatedIndicated.style.display = "none";
