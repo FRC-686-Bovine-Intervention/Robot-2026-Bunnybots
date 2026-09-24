@@ -65,12 +65,11 @@
   background-color: #2196f3;
 }
 
-#algae_goal {
+#rp_tracker {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: auto;
-  cursor: pointer;
 }
 
 .primary {
@@ -84,11 +83,10 @@
   gap: 10px;
 }
 
-#algae_goal .button {
+#rp_tracker .rp {
   width: 100%;
   padding: 15px;
   border-radius: 10px;
-  cursor: pointer;
   display: flex;
   gap: 5px;
   align-items: center;
@@ -98,19 +96,15 @@
   background-color: #37373d;
 }
 
-#algae_goal .primary .button > svg {
+#rp_tracker .primary .rp > svg {
   width: 30px;
 }
 
-#algae_goal .button.selected {
-  background-color: #e13f3f;
+#rp_tracker .rp.complete {
+  background-color: #4bb543;
 }
 
-.secondary .button > svg {
-  width: 20px;
-}
-
-#oven {
+#ovenCarrots, #ovenCakes {
   margin-top: auto;
   display: flex;
   align-items: center;

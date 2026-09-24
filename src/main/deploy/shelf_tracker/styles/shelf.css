@@ -42,7 +42,7 @@
 
 .stripe {
   height: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 2;
   cursor: pointer;
   pointer-events: all;
   background-color: #ffffff1f;
@@ -64,12 +64,13 @@
   padding: 0;
 }
 
-#oven {
+#ovenCarrots, #ovenCakes {
   margin-top: 0;
   width: 220px;
 }
 
-#oven.locked,
+#ovenCarrots.locked,
+#ovenCakes.locked,
 .carrot.locked,
 .stripe.locked {
   border: 5px solid #fdfdfd;

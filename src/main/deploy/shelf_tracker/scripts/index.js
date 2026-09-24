@@ -10,7 +10,8 @@ const carrotCakeGoalTopicName = "CarrotCakeGoal";
 
 const carrotTopicName = "Carrot";
 const carrotCakeTopicName = "CarrotCake";
-const ovenTopicName = "Oven";
+const ovenCarrotsTopicName = "OvenCarrots";
+const ovenCakesTopicName = "OvenCakes";
 const bakerModeTopicName = "BakerMode";
 const priorityListTopicName = "PriorityList";
 
@@ -20,7 +21,8 @@ const carrotCakeScoreTargetTopicName = "Score/CarrotCake";
 let mode = "SMART";
 let carrotGoal = 0;
 let carrotCakeGoal = 0;
-let ovenState = 0;
+let ovenCarrotsState = 0;
+let ovenCakesState = 0;
 let carrotState = [];
 let carrotCakeState = [];
 let bakerModeState = 0;
@@ -42,11 +44,13 @@ const ntClient = new NT4_Client(
     } else if (topic.name === toDashboardPrefix + carrotCakeGoalTopicName) {
       carrotCakeGoal = value;
     } else if (topic.name === toDashboardPrefix + carrotTopicName) {
-      carrotState = convertIntToBooleanArr(value, 36);
+      carrotState = convertIntToBooleanArr(value, 15);
     } else if (topic.name === toDashboardPrefix + carrotCakeTopicName) {
-      carrotCakeState = convertIntToBooleanArr(value, 36);
-    } else if (topic.name === toDashboardPrefix + ovenTopicName) {
-      ovenState = value;
+      carrotCakeState = convertIntToBooleanArr(value, 15);
+    } else if (topic.name === toDashboardPrefix + ovenCarrotsTopicName) {
+      ovenCarrotsState = value;
+    } else if (topic.name === toDashboardPrefix + ovenCakesTopicName) {
+      ovenCakesState = value;
     } else if (topic.name === toDashboardPrefix + bakerModeTopicName) {
       bakerModeState = value;
     } else if (topic.name === toDashboardPrefix + priorityListTopicName) {
@@ -95,7 +99,8 @@ window.addEventListener("load", () => {
       toDashboardPrefix + carrotCakeGoalTopicName,
       toDashboardPrefix + carrotTopicName,
       toDashboardPrefix + carrotCakeTopicName,
-      toDashboardPrefix + ovenTopicName,
+      toDashboardPrefix + ovenCarrotsTopicName,
+      toDashboardPrefix + ovenCakesTopicName,
       toDashboardPrefix + bakerModeTopicName,
       toDashboardPrefix + priorityListTopicName,
       toDashboardPrefix + carrotScoreTargetTopicName,
@@ -111,16 +116,23 @@ window.addEventListener("load", () => {
   ntClient.publishTopic(toRobotPrefix + carrotCakeGoalTopicName, "int");
   ntClient.publishTopic(toRobotPrefix + carrotTopicName, "double");
   ntClient.publishTopic(toRobotPrefix + carrotCakeTopicName, "double");
-  ntClient.publishTopic(toRobotPrefix + ovenTopicName, "int");
+  ntClient.publishTopic(toRobotPrefix + ovenCarrotsTopicName, "int");
+  ntClient.publishTopic(toRobotPrefix + ovenCakesTopicName, "int");
   ntClient.publishTopic(toRobotPrefix + bakerModeTopicName, "boolean");
   ntClient.publishTopic(toRobotPrefix + priorityListTopicName, "int[]");
   ntClient.connect();
 });
 
-const ovenDOM = document.getElementById("oven");
-const ovenAddDOM = document.getElementById("add");
-const ovenCounter = document.getElementById("counter");
-const ovenSubtractDOM = document.getElementById("subtract");
+const ovenCarrotsDOM = document.getElementById("ovenCarrots");
+const ovenCarrotsAddDOM = ovenCarrotsDOM.getElementById("add");
+const ovenCarrotsCounter = ovenCarrotsDOM.getElementById("counter");
+const ovenCarrotsSubtractDOM = ovenCarrotsDOM.getElementById("subtract");
+
+const ovenCakesDOM = document.getElementById("ovenCarrots");
+const ovenCakesAddDOM = ovenCakesDOM.getElementById("add");
+const ovenCakesCounter = ovenCakesDOM.getElementById("counter");
+const ovenCakesSubtractDOM = ovenCakesDOM.getElementById("subtract");
+
 const bakerModeDOM = document.getElementById("baker_mode");
 
 const modeToggleDOM = document.getElementById("mode");
@@ -146,19 +158,23 @@ const bakeRpDOM = document.getElementById("bakeRp");
 
 function updateUI() {
   if (mode === "DUMB") {
-    ovenDOM.style.display = "none";
     bakerModeDOM.style.display = "none";
     priorityListDOM.style.display = "none";
   } else {
-    ovenDOM.style.display = "";
     bakerModeDOM.style.display = "";
     priorityListDOM.style.display = "";
   }
 
-  if (mode === "SMART" && (carrotScoreTarget === -1 || carrotCakeScoreTarget === -1)) {
-    ovenDOM.classList.add("locked");
+  if (mode === "SMART" && carrotScoreTarget === -1) {
+    ovenCarrotsDOM.classList.add("locked");
   } else {
-    ovenDOM.classList.remove("locked");
+    ovenCarrotsDOM.classList.remove("locked");
+  }
+
+  if (mode === "SMART" && carrotCakeScoreTarget === -1) {
+    ovenCakesDOM.classList.add("locked");
+  } else {
+    ovenCakesDOM.classList.remove("locked");
   }
 
   levelsDOM.forEach((levelDOM, level) => {
@@ -259,15 +275,15 @@ function updateUI() {
         });
 
       if (stockRpLevelCount >= 3) {
-        stockRpDOM.style.display = "";
+        stockRpDOM.classList.add("complete");
       } else {
-        stockRpDOM.style.display = "none";
+        stockRpDOM.classList.remove("complete");
       }
 
       if (bakeRpLevelCount >= 3) {
-        bakeRpDOM.style.display = "";
+        bakeRpDOM.classList.add("complete");
       } else {
-        bakeRpDOM.style.display = "none";
+        bakeRpDOM.classList.remove("complete");
       }
     }
   }
@@ -309,58 +325,69 @@ window.addEventListener("load", () => {
     ntClient.addSample(toRobotPrefix + modeTopicName, mode === "SMART" ? 1 : 0);
   });
 
-  troughDOM.forEach((level1DOM, rack) => {
-    bind(level1DOM, () => {
-      if (mode === "SMART") return;
-      ntClient.addSample(toRobotPrefix + coralGoalTopicName, 36 + rack);
-    });
+  
+  bind(ovenCarrotsDOM, () => {
+    if (mode === "SMART") return;
+    ntClient.addSample(toRobotPrefix + carrotGoalTopicName, -1);
   });
 
-  racksDOM.forEach((racks, rack) => {
-    racks.forEach((levels, level) => {
-      levels.forEach((sideDOM, side) => {
-        bind(sideDOM, () => {
-          if (mode === "DUMB") {
-            const id = getCoralID({ rack, level, side });
-            ntClient.addSample(toRobotPrefix + coralGoalTopicName, id);
-            return;
-          }
-          const id = getCoralID({ rack, level, side });
-          const offset = coralState[id] ? 36 : 0;
-          ntClient.addSample(toRobotPrefix + coralTopicName, id - offset);
+  bind(ovenCakesDOM, () => {
+    if (mode === "SMART") return;
+    ntClient.addSample(toRobotPrefix + carrotCakeGoalTopicName, -1);
+  })
+
+  levelsDOM.forEach((levelDOM, level) => {
+    levelDOM.forEach(([carrotDOM, carrotCakeDOM], pos) => {
+        bind(carrotDOM, (e) => {
+            if (carrotCakeDOM.contains(e.target)) return;
+
+            if (mode === "DUMB") {
+                const id = getCarrotID({level, pos});
+                ntClient.addSample(toRobotPrefix + carrotGoalTopicName, id);
+                return;
+            }
+            const id = getCarrotID({level, pos});
+            const offset = carrotState[id] ? 15 : 0;
+            ntClient.addSample(toRobotPrefix + carrotTopicName, id - offset);
         });
-      });
+
+        bind(carrotCakeDOM, () => {
+            if (mode === "DUMB") {
+                const id = getCarrotID({level, pos});
+                ntClient.addSample(toRobotPrefix + carrotCakeGoalTopicName, id);
+                return;
+            }
+            const id = getCarrotID({level, pos});
+            const offset = carrotCakeState[id] ? 15 : 0;
+            ntClient.addSample(toRobotPrefix + carrotCakeTopicName, id - offset);
+        });
     });
   });
 
-  algaeDOM.forEach((element, index) => {
-    bind(element, () => {
-      // if (mode === "DUMB") return;
-      const id = index;
-      const offset = algaeState[id] ? 6 : 0;
-      ntClient.addSample(toRobotPrefix + algaeTopicName, id - offset);
-    });
-  });
-
-  bind(l1AddDOM, () => {
+  bind(ovenCarrotsAddDOM, () => {
     if (mode === "DUMB") return;
-    ntClient.addSample(toRobotPrefix + l1TopicName, +1);
+    ntClient.addSample(toRobotPrefix + ovenCarrotsTopicName, +1);
   });
-  bind(l1SubtractDOM, () => {
+  bind(ovenCarrotsSubtractDOM, () => {
     if (mode === "DUMB") return;
-    if (l1State > 0) {
-      ntClient.addSample(toRobotPrefix + l1TopicName, -1);
+    if (ovenCarrotsState > 0) {
+      ntClient.addSample(toRobotPrefix + ovenCarrotsTopicName, -1);
     }
   });
 
-  bind(coopDOM, () => {
-    ntClient.addSample(toRobotPrefix + coopTopicName, !coopState);
+  bind(ovenCakesAddDOM, () => {
+    if (mode === "DUMB") return;
+    ntClient.addSample(toRobotPrefix + ovenCakesTopicName, +1);
+  });
+  bind(ovenCakesSubtractDOM, () => {
+    if (mode === "DUMB") return;
+    if (ovenCakesState > 0) {
+      ntClient.addSample(toRobotPrefix + ovenCakesTopicName, -1);
+    }
   });
 
-  algaeGoalDOM.forEach((element, index) => {
-    bind(element, () => {
-      ntClient.addSample(toRobotPrefix + algaeGoalTopicName, index);
-    });
+  bind(bakerModeDOM, () => {
+    ntClient.addSample(toRobotPrefix + bakerModeTopicName, !bakerModeState);
   });
 
   const swapy = Swapy.createSwapy(priorityListDOM);
