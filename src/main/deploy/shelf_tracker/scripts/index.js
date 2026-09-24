@@ -158,9 +158,13 @@ const bakeRpDOM = document.getElementById("bakeRp");
 
 function updateUI() {
   if (mode === "DUMB") {
+    stockRpDOM.style.display = "none";
+    bakeRpDOM.style.display = "none";
     bakerModeDOM.style.display = "none";
     priorityListDOM.style.display = "none";
   } else {
+    stockRpDOM.style.display = "";
+    bakeRpDOM.style.display = "";
     bakerModeDOM.style.display = "";
     priorityListDOM.style.display = "";
   }
@@ -218,7 +222,8 @@ function updateUI() {
     priorityUpdatedIndicated.style.display = "";
   });
 
-  ovenCounter.textContent = ovenState;
+  ovenCarrotsCounter.textContent = ovenCarrotsState;
+  ovenCakesCounter.textContent = ovenCakesState;
 
   if (mode === "SMART") {
     let stockRpLevelCount = 0;
@@ -425,25 +430,8 @@ window.addEventListener("load", () => {
   });
 });
 
-function getCoralIDFromPipe({ pipe, level }) {
-  return level * 12 + pipe;
-}
-
-function getCoralID({ rack, level, side }) {
-  return level * 12 + rack * 2 + side;
-}
-
 function getCarrotID({level, pos}) {
     return level * 5 + pos;
-}
-
-function getCoral(id) {
-  return {
-    rack: Math.floor((id % 12) / 2),
-    level: Math.floor(id / 12),
-    side: (id % 12) % 2,
-    pipe: id % 12,
-  };
 }
 
 function getCarrot(id) {
