@@ -1,15 +1,21 @@
 package frc.robot.subsystems.objectiveTracker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.objectiveTracker.ObjectiveTracker.CarrotGoal;
+import frc.util.LoggedTracer;
 import frc.util.VirtualSubsystem;
 
 public class ObjectiveTracker extends VirtualSubsystem {
@@ -165,7 +171,6 @@ public class ObjectiveTracker extends VirtualSubsystem {
     private final List<Priority> uncompletedPriorities = new ArrayList<>(fullStrategy.size());
 
     public static enum ObjectiveType {
-        IntakeCarrot(false),
         ScoreCarrot(true),
         ScoreCarrotCake(true),
         ;
@@ -175,6 +180,15 @@ public class ObjectiveTracker extends VirtualSubsystem {
             this.isScoreObjective = isScoreObjective;
         }
     }
+
+	public ObjectiveTracker(ShelfTrackerIO io) {
+		System.out.println("[Init ObjectiveTracker] Instantiating ObjectiveTracker with " + io.getClass().getSimpleName());
+		this.io = io;
+
+		updateCarrots();
+		updateCarrotCakes();
+		updateIncompletePriorities();
+	}
 
     @Override
     public void periodic() {
@@ -225,7 +239,122 @@ public class ObjectiveTracker extends VirtualSubsystem {
         for (var changedCarrot : inputs.carrotQueue) {
             carrotsChanged = true;
             var carrotState = changedCarrot >= 0;
-            var 
+            var carrotID = carrotState ? changedCarrot : changedCarrot + 15;
+			this.carrotStates[(int) carrotID] = carrotState;
         }
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Carrot States");
+		
+		var carrotCakesChanged = false;
+        for (var changedCarrotCake : inputs.carrotCakeQueue) {
+            carrotCakesChanged = true;
+            var carrotCakeState = changedCarrotCake >= 0;
+            var carrotCakeID = carrotCakeState ? changedCarrotCake : changedCarrotCake + 15;
+			this.carrotStates[(int) carrotCakeID] = carrotCakeState;
+        }
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Carrot Cake States");
+
+		var ovenCarrotsChanged = false;
+		for (var changedOvenCarrots : inputs.ovenCarrotsQueue) {
+			ovenCarrotsChanged = true;
+			ovenCarrotsCount += changedOvenCarrots;
+		}
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Oven Carrots Count");
+		
+		var ovenCakesChanged = false;
+		for (var changedOvenCakes : inputs.ovenCakesQueue) {
+			ovenCakesChanged = true;
+			ovenCakesCount += changedOvenCakes;
+		}
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Oven Cakes Count");
+
+		var strategyChanged = false;
+		for (var changedPriority : this.inputs.priorityListQueue) {
+            strategyChanged = true;
+            var oldIndex = changedPriority[0];
+            var newIndex = changedPriority[1];
+            Collections.swap(this.fullStrategy, oldIndex, newIndex);
+        }
+        LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Full Strategy");
+
+		var bakerModeChanged = false;
+        for (var changedBakerMode : this.inputs.bakerMode) {
+            bakerModeChanged = true;
+            this.bakerModeState = changedBakerMode;
+        }
+        LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Baker Mode State");
+
+		if (carrotsChanged || carrotCakesChanged) {
+			this.updateAvailableShelfPositions();
+		}
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Available Shelf Positions");
+
+		if (carrotsChanged || carrotCakesChanged || ovenCarrotsChanged || ovenCakesChanged) {
+			this.updateIncompletePriorities();
+		}
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Incompete Priorities");
+
+		for (var priority : this.fullStrategy) {
+			Logger.recordOutput(
+				switch (priority) {
+					case Level3Fill -> "ObjectiveTracker/Priorities/Fill/Level 3";
+					case Level2Fill -> "ObjectiveTracker/Priorities/Fill/Level 2";
+					case Level1Fill -> "ObjectiveTracker/Priorities/Fill/Level 1";
+					case OvenSpam -> "ObjectiveTracker/Priorities/Other/Oven Spam";
+					case Level3StockedUp -> "ObjectiveTracker/Priorities/SRP/Level 3";
+					case Level2StockedUp -> "ObjectiveTracker/Priorities/SRP/Level 2";
+					case Level1StockedUp -> "ObjectiveTracker/Priorities/SRP/Level 1";
+					case Level3BakedUp -> "ObjectiveTracker/Priorities/BRP/Level 3";
+					case Level2BakedUp -> "ObjectiveTracker/Priorities/BRP/Level 2";
+					case Level1BakedUp -> "ObjectiveTracker/Priorities/BRP/Level 1";
+				},
+				priority.isCompleted(this.carrotStates, this.carrotCakeStates, this.ovenCarrotsCount, this.ovenCakesCount)
+			);
+		}
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Log Priorities");
+        
+		this.io.setCarrotState(this.carrotStates);
+		this.io.setCarrotCakeState(this.carrotCakeStates);
+		this.io.setOvenCarrotsCount(this.ovenCakesCount);
+		this.io.setOvenCakesCount(this.ovenCakesCount);
+		this.io.setBakerModeState(this.bakerModeState);
+		this.io.setPriorityList(this.fullStrategy.stream().mapToInt(Enum::ordinal).toArray());
+
+		Logger.recordOutput("Objective Tracker/Priorities/Strategy/Full", this.fullStrategy.toArray(Priority[]::new));
+        Logger.recordOutput("Objective Tracker/Priorities/Strategy/Uncomplete", this.uncompletedPriorities.toArray(Priority[]::new));
+        LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Periodic");
+        LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker");
     }
+
+	private void updateShelfPositions() {
+		this.availableShelfPositions.clear();
+		var filledShelfPositions = new ArrayList<Pose3d>(15);
+		for (int i = 0; i < carrotStates.length; i++) {
+			if (carrotStates[i] == false) {
+				availableShelfPositions.add(Shelf.positions[i]);
+			} else {
+				filledShelfPositions.add(Shelf.shelfs.getOurs().positions[i].pose);
+			}
+			Logger.recordOutput("Objective Tracker/Reef/Coral", filledShelfPositions.toArray(Pose3d[]::new));
+		}
+	}
+
+	public void determineGoal(Pose2d currentPose, boolean hasCarrot, boolean hasCarrotCake) {
+		if (mode == Mode.Smart) {
+			var closestPositions = Arrays.stream(Shelf.shelfs.getOurs().postitions)
+				.sorted((a,b) -> {
+					var aDistance = a.robotPose.getClosest(currentPose.getRotation()).getTranslation().getDistance(currentPose.getTranslation());
+                    var bDistance = b.robotPose.getClosest(currentPose.getRotation()).getTranslation().getDistance(currentPose.getTranslation());
+					return (int) Math.signum(aDistance - bDistance);
+				})
+				.toList()
+			;
+
+			var target =
+				Stream.concat(
+					availableShelfPositions.stream().map((position) -> position.getOurs()).map(PositionOrOvenObject::fromPosition),
+					Arrays.stream(Shelf.shelfs.getOurs().positions).map(PositionOrOvenObject::fromOven)
+				)
+				.filter((positionOrOven) -> positionOrOven.isOven() || closestPositions.contains(positionOrOven.getPosition().))
+		}
+	}
 }
