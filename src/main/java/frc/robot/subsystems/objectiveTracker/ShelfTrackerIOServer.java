@@ -5,12 +5,11 @@ import java.util.Arrays;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanSubscriber;
-import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerArraySubscriber;
+import edu.wpi.first.networktables.IntegerArrayPublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.PubSub;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj.Filesystem;
 
@@ -22,8 +21,7 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
     private static final String carrotGoalTopicName = "CarrotGoal";
     private static final String carrotCakeGoalTopicName = "CarrotCakeGoal";
 
-    private static final String carrotTopicName = "Carrot";
-    private static final String carrotCakeTopicName = "CarrotCake";
+    private static final String shelfTopicName = "shelf";
     private static final String ovenCarrotsTopicName = "OvenCarrots";
     private static final String ovenCakesTopicName = "OvenCakes";
     private static final String bakerModeTopicName = "BakerMode";
@@ -33,8 +31,7 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
     private final IntegerSubscriber carrotGoalSubscriber;
     private final IntegerSubscriber carrotCakeGoalSubscriber;
 
-    private final IntegerSubscriber carrotQueueSubscriber;
-    private final IntegerSubscriber carrotCakeQueueSubscriber;
+    private final IntegerArraySubscriber shelfSubscriber;
     private final IntegerSubscriber ovenCarrotsCountSubscriber;
     private final IntegerSubscriber ovenCakesCountSubscriber;
     private final BooleanSubscriber bakerModeSubscriber;
@@ -44,8 +41,7 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
     private final IntegerPublisher carrotGoalPublisher;
     private final IntegerPublisher carrotCakeGoalPublisher;
 
-    private final DoublePublisher carrotStatePublisher;
-    private final DoublePublisher carrotCakeStatePublisher;
+    private final IntegerArrayPublisher shelfPublisher;
     private final IntegerPublisher ovenCarrotsCountPublisher;
     private final IntegerPublisher ovenCakesCountPublisher;
     private final BooleanPublisher bakerModePublisher;
@@ -70,13 +66,9 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
             .getIntegerTopic(carrotCakeGoalTopicName)
             .subscribe(0, PubSubOption.keepDuplicates(true));
         
-        carrotQueueSubscriber = inputTable
-            .getIntegerTopic(carrotTopicName)
-            .subscribe(0, PubSubOption.keepDuplicates(true));
-        
-        carrotCakeQueueSubscriber = inputTable
-            .getIntegerTopic(carrotCakeTopicName)
-            .subscribe(0, PubSubOption.keepDuplicates(true));
+        shelfSubscriber = inputTable
+            .getIntegerArrayTopic(shelfTopicName)
+            .subscribe(new long[0], PubSubOption.keepDuplicates(true));
         
         ovenCarrotsCountSubscriber = inputTable
             .getIntegerTopic(ovenCarrotsTopicName)
@@ -101,8 +93,7 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
         carrotGoalPublisher = outputTable.getIntegerTopic(carrotGoalTopicName).publish();
         carrotCakeGoalPublisher = outputTable.getIntegerTopic(carrotCakeGoalTopicName).publish();
 
-        carrotStatePublisher = outputTable.getDoubleTopic(carrotTopicName).publish();
-        carrotCakeStatePublisher = outputTable.getDoubleTopic(carrotCakeTopicName).publish();
+        shelfPublisher = outputTable.getIntegerArrayTopic(shelfTopicName).publish();
         ovenCarrotsCountPublisher = outputTable.getIntegerTopic(ovenCarrotsTopicName).publish();
         ovenCakesCountPublisher = outputTable.getIntegerTopic(ovenCakesTopicName).publish();
         bakerModePublisher = outputTable.getBooleanTopic(bakerModeTopicName).publish();
@@ -121,8 +112,7 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
             inputs.carrotCakeGoal = (int) carrotCakeGoalSubscriber.get();
         }
 
-        inputs.carrotQueue = carrotQueueSubscriber.readQueueValues();
-        inputs.carrotCakeQueue = carrotCakeQueueSubscriber.readQueueValues();
+        inputs.shelfQueue = shelfSubscriber.readQueueValues();
         inputs.ovenCarrotsQueue = ovenCarrotsCountSubscriber.readQueueValues();
         inputs.ovenCakesQueue = ovenCakesCountSubscriber.readQueueValues();
         inputs.bakerMode = bakerModeSubscriber.readQueueValues();
@@ -157,21 +147,9 @@ public class ShelfTrackerIOServer implements ShelfTrackerIO {
     }
 
     @Override
-    public void setCarrotState(boolean[] value) {
-        long n = 0; //64 bit
-        for (boolean b: value) {
-            n = (n << 1) | (b ? 1 : 0);
-        }
-        carrotStatePublisher.set(n);
-    }
-
-    @Override
-    public void setCarrotCakeState(boolean[] value) {
-        long n = 0; //64 bit
-        for (boolean b: value) {
-            n = (n << 1) | (b ? 1 : 0);
-        }
-        carrotCakeStatePublisher.set(n);
+    public void setShelfState(int[] value) {
+        long[] shelf = Arrays.stream(value).asLongStream().toArray();
+        shelfPublisher.set(shelf);
     }
 
     @Override

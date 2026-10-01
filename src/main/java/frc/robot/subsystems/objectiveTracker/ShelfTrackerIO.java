@@ -8,8 +8,7 @@ public interface ShelfTrackerIO {
         public int carrotGoal;
         public int carrotCakeGoal;
 
-        public long[] carrotQueue = new long[0];
-        public long[] carrotCakeQueue = new long[0];
+        public long[][] shelfQueue = new long[0][];
 
         public long[] ovenCarrotsQueue = new long[0];
         public long[] ovenCakesQueue = new long[0];
@@ -25,8 +24,7 @@ public interface ShelfTrackerIO {
     default void setCarrotGoal(int value) {}
     default void setCarrotCakeGoal(int value) {}
     
-    default void setCarrotState(boolean[] value) {}
-    default void setCarrotCakeState(boolean[] value) {}
+    default void setShelfState(int[] value) {}
     default void setOvenCarrotsCount(int value) {}
     default void setOvenCakesCount(int value) {}
     default void setBakerModeState(boolean value) {}

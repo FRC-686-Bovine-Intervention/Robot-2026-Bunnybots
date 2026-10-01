@@ -36,89 +36,92 @@ public class ObjectiveTracker extends VirtualSubsystem {
     public static enum Priority {
         Level3Fill(Optional.of(ShelfLevel.Level3), false, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 for (int i = 10; i < 15; i++) {
-                    if (carrotStates[i] = false) return false;
+                    if (shelfStates[i] == 0) return false;
                 }
                 return true;
             }
         },
         Level2Fill(Optional.of(ShelfLevel.Level2), false, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 for (int i = 5; i < 10; i++) {
-                    if (carrotStates[i] = false) return false;
+                    if (shelfStates[i] == 0) return false;
                 }
                 return true;
             }
         },
         Level1Fill(Optional.of(ShelfLevel.Level1), false, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 for (int i = 0; i < 5; i++) {
-                    if (carrotStates[i] = false) return false;
+                    if (shelfStates[i] == 0) return false;
                 }
                 return true;
             }
         },
         OvenSpam(Optional.empty(), false, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 return ovenCarrotsCount + ovenCakesCount > 5;
             }
         },
         Level3StockedUp(Optional.of(ShelfLevel.Level3), true, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 int total = 0;
                 for (int i = 10; i < 15; i++) {
-                    total += carrotStates[i] ? 1 : 0;
+                    total += shelfStates[i] != 0 ? 1 : 0;
                 }
                 return total >= 3;
             }
         },
         Level2StockedUp(Optional.of(ShelfLevel.Level2), true, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 int total = 0;
                 for (int i = 5; i < 10; i++) {
-                    total += carrotStates[i] ? 1 : 0;
+                    total += shelfStates[i] != 0 ? 1 : 0;
                 }
                 return total >= 3;
             }
         },
         Level1StockedUp(Optional.of(ShelfLevel.Level1), true, false) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 int total = 0;
                 for (int i = 0; i < 5; i++) {
-                    total += carrotStates[i] ? 1 : 0;
+                    total += shelfStates[i] != 0 ? 1 : 0;
                 }
                 return total >= 3;
             }
         },
         Level3BakedUp(Optional.of(ShelfLevel.Level3), false, true) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 for (int i = 10; i < 15; i++) {
-                    if (carrotCakeStates[i]) return true;
+                    if (shelfStates[i] == 2) return true;
                 }
+                return false;
             }
         },
         Level2BakedUp(Optional.of(ShelfLevel.Level2), false, true) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 for (int i = 5; i < 10; i++) {
-                    if (carrotCakeStates[i]) return true;
+                    if (shelfStates[i] == 2) return true;
                 }
+                return false;
             }
         },
         Level1BakedUp(Optional.of(ShelfLevel.Level1), false, true) {
             @Override
-            public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+            public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
                 for (int i = 0; i < 5; i++) {
-                    if (carrotCakeStates[i]) return true;
+                    if (shelfStates[i] == 2) return true;
                 }
+                return false;
             }
         };
 
@@ -130,7 +133,7 @@ public class ObjectiveTracker extends VirtualSubsystem {
             this.isSRP = isSRP;
             this.isBRP = isBRP;
         }
-        public boolean isCompleted(boolean[] carrotStates, boolean[] carrotCakeStates, int ovenCarrotsCount, int ovenCakesCount) {
+        public boolean isCompleted(int[] shelfStates, int ovenCarrotsCount, int ovenCakesCount) {
             return false;
         }
     }
@@ -140,16 +143,7 @@ public class ObjectiveTracker extends VirtualSubsystem {
 
     private Mode mode = Mode.Dumb;
 
-    private final boolean[] carrotStates = new boolean[] {
-        false, false, false, false, false,
-        false, false, false, false, false,
-        false, false, false, false, false,
-    };
-    private final boolean[] carrotCakeStates = new boolean[] {
-        false, false, false, false, false,
-        false, false, false, false, false,
-        false, false, false, false, false,
-    };
+    private final int[] shelfStates = new int[15];
     private int ovenCarrotsCount = 0;
     private int ovenCakesCount = 0;
     private boolean bakerModeState = false;
@@ -185,8 +179,7 @@ public class ObjectiveTracker extends VirtualSubsystem {
 		System.out.println("[Init ObjectiveTracker] Instantiating ObjectiveTracker with " + io.getClass().getSimpleName());
 		this.io = io;
 
-		updateCarrots();
-		updateCarrotCakes();
+        updateShelfPositions();
 		updateIncompletePriorities();
 	}
 
@@ -235,23 +228,14 @@ public class ObjectiveTracker extends VirtualSubsystem {
                 break;
         }
 
-        var carrotsChanged = false;
-        for (var changedCarrot : inputs.carrotQueue) {
-            carrotsChanged = true;
-            var carrotState = changedCarrot >= 0;
-            var carrotID = carrotState ? changedCarrot : changedCarrot + 15;
-			this.carrotStates[(int) carrotID] = carrotState;
+        var shelfChanged = inputs.shelfQueue.length > 0;
+        for (var shelfSnapshot : inputs.shelfQueue) {
+            for (int i = 0; i < shelfStates.length; i++) {
+                long value = i < shelfSnapshot.length ? shelfSnapshot[i] : 0;
+                shelfStates[i] = value == 1 || value == 2 ? (int) value : 0;
+            }
         }
-		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Carrot States");
-		
-		var carrotCakesChanged = false;
-        for (var changedCarrotCake : inputs.carrotCakeQueue) {
-            carrotCakesChanged = true;
-            var carrotCakeState = changedCarrotCake >= 0;
-            var carrotCakeID = carrotCakeState ? changedCarrotCake : changedCarrotCake + 15;
-			this.carrotStates[(int) carrotCakeID] = carrotCakeState;
-        }
-		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Carrot Cake States");
+		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Shelf State");
 
 		var ovenCarrotsChanged = false;
 		for (var changedOvenCarrots : inputs.ovenCarrotsQueue) {
@@ -283,12 +267,12 @@ public class ObjectiveTracker extends VirtualSubsystem {
         }
         LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Baker Mode State");
 
-		if (carrotsChanged || carrotCakesChanged) {
-			this.updateAvailableShelfPositions();
+        if (shelfChanged) {
+            this.updateShelfPositions();
 		}
 		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Available Shelf Positions");
 
-		if (carrotsChanged || carrotCakesChanged || ovenCarrotsChanged || ovenCakesChanged) {
+        if (shelfChanged || ovenCarrotsChanged || ovenCakesChanged) {
 			this.updateIncompletePriorities();
 		}
 		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Update Incompete Priorities");
@@ -307,14 +291,13 @@ public class ObjectiveTracker extends VirtualSubsystem {
 					case Level2BakedUp -> "ObjectiveTracker/Priorities/BRP/Level 2";
 					case Level1BakedUp -> "ObjectiveTracker/Priorities/BRP/Level 1";
 				},
-				priority.isCompleted(this.carrotStates, this.carrotCakeStates, this.ovenCarrotsCount, this.ovenCakesCount)
+                priority.isCompleted(this.shelfStates, this.ovenCarrotsCount, this.ovenCakesCount)
 			);
 		}
 		LoggedTracer.logEpoch("CommandScheduler Periodic/VirtualSubsystem Periodic/ObjectiveTracker/Log Priorities");
         
-		this.io.setCarrotState(this.carrotStates);
-		this.io.setCarrotCakeState(this.carrotCakeStates);
-		this.io.setOvenCarrotsCount(this.ovenCakesCount);
+        this.io.setShelfState(this.shelfStates);
+        this.io.setOvenCarrotsCount(this.ovenCarrotsCount);
 		this.io.setOvenCakesCount(this.ovenCakesCount);
 		this.io.setBakerModeState(this.bakerModeState);
 		this.io.setPriorityList(this.fullStrategy.stream().mapToInt(Enum::ordinal).toArray());
@@ -328,8 +311,8 @@ public class ObjectiveTracker extends VirtualSubsystem {
 	private void updateShelfPositions() {
 		this.availableShelfPositions.clear();
 		var filledShelfPositions = new ArrayList<Pose3d>(15);
-		for (int i = 0; i < carrotStates.length; i++) {
-			if (carrotStates[i] == false) {
+        for (int i = 0; i < shelfStates.length; i++) {
+            if (shelfStates[i] == 0) {
 				availableShelfPositions.add(Shelf.positions[i]);
 			} else {
 				filledShelfPositions.add(Shelf.shelfs.getOurs().positions[i].pose);
@@ -340,21 +323,7 @@ public class ObjectiveTracker extends VirtualSubsystem {
 
 	public void determineGoal(Pose2d currentPose, boolean hasCarrot, boolean hasCarrotCake) {
 		if (mode == Mode.Smart) {
-			var closestPositions = Arrays.stream(Shelf.shelfs.getOurs().postitions)
-				.sorted((a,b) -> {
-					var aDistance = a.robotPose.getClosest(currentPose.getRotation()).getTranslation().getDistance(currentPose.getTranslation());
-                    var bDistance = b.robotPose.getClosest(currentPose.getRotation()).getTranslation().getDistance(currentPose.getTranslation());
-					return (int) Math.signum(aDistance - bDistance);
-				})
-				.toList()
-			;
-
-			var target =
-				Stream.concat(
-					availableShelfPositions.stream().map((position) -> position.getOurs()).map(PositionOrOvenObject::fromPosition),
-					Arrays.stream(Shelf.shelfs.getOurs().positions).map(PositionOrOvenObject::fromOven)
-				)
-				.filter((positionOrOven) -> positionOrOven.isOven() || closestPositions.contains(positionOrOven.getPosition().))
+			
 		}
 	}
 }
