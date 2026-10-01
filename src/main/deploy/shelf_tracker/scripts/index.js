@@ -8,8 +8,7 @@ const modeTopicName = "Mode";
 const carrotGoalTopicName = "CarrotGoal";
 const carrotCakeGoalTopicName = "CarrotCakeGoal";
 
-const carrotTopicName = "Carrot";
-const carrotCakeTopicName = "CarrotCake";
+const shelfTopicName = "shelf";
 const ovenCarrotsTopicName = "OvenCarrots";
 const ovenCakesTopicName = "OvenCakes";
 const bakerModeTopicName = "BakerMode";
@@ -23,8 +22,7 @@ let carrotGoal = 0;
 let carrotCakeGoal = 0;
 let ovenCarrotsState = 0;
 let ovenCakesState = 0;
-let carrotState = [];
-let carrotCakeState = [];
+let shelfState = Array(15).fill(0);
 let bakerModeState = 0;
 let priorityListState = [];
 
@@ -43,10 +41,11 @@ const ntClient = new NT4_Client(
       carrotGoal = value;
     } else if (topic.name === toDashboardPrefix + carrotCakeGoalTopicName) {
       carrotCakeGoal = value;
-    } else if (topic.name === toDashboardPrefix + carrotTopicName) {
-      carrotState = convertIntToBooleanArr(value, 15);
-    } else if (topic.name === toDashboardPrefix + carrotCakeTopicName) {
-      carrotCakeState = convertIntToBooleanArr(value, 15);
+    } else if (topic.name === toDashboardPrefix + shelfTopicName) {
+      shelfState = Array.from({ length: 15 }, (_, index) => {
+        const item = Number(value[index]);
+        return item === 1 || item === 2 ? item : 0;
+      });
     } else if (topic.name === toDashboardPrefix + ovenCarrotsTopicName) {
       ovenCarrotsState = value;
     } else if (topic.name === toDashboardPrefix + ovenCakesTopicName) {
@@ -97,8 +96,7 @@ window.addEventListener("load", () => {
       toDashboardPrefix + modeTopicName,
       toDashboardPrefix + carrotGoalTopicName,
       toDashboardPrefix + carrotCakeGoalTopicName,
-      toDashboardPrefix + carrotTopicName,
-      toDashboardPrefix + carrotCakeTopicName,
+      toDashboardPrefix + shelfTopicName,
       toDashboardPrefix + ovenCarrotsTopicName,
       toDashboardPrefix + ovenCakesTopicName,
       toDashboardPrefix + bakerModeTopicName,
@@ -114,8 +112,7 @@ window.addEventListener("load", () => {
   ntClient.publishTopic(toRobotPrefix + modeTopicName, "int");
   ntClient.publishTopic(toRobotPrefix + carrotGoalTopicName, "int");
   ntClient.publishTopic(toRobotPrefix + carrotCakeGoalTopicName, "int");
-  ntClient.publishTopic(toRobotPrefix + carrotTopicName, "double");
-  ntClient.publishTopic(toRobotPrefix + carrotCakeTopicName, "double");
+  ntClient.publishTopic(toRobotPrefix + shelfTopicName, "int[]");
   ntClient.publishTopic(toRobotPrefix + ovenCarrotsTopicName, "int");
   ntClient.publishTopic(toRobotPrefix + ovenCakesTopicName, "int");
   ntClient.publishTopic(toRobotPrefix + bakerModeTopicName, "boolean");
@@ -184,33 +181,25 @@ function updateUI() {
   levelsDOM.forEach((levelDOM, level) => {
     levelDOM.forEach(([carrotDOM, carrotCakeDOM], pos) => {
         let index = getCarrotID({level, pos});
-        if (
-            (mode === "SMART" && carrotCakeState[index]) ||
-            (mode === "DUMB" && index === carrotCakeGoal) 
-        ){
-            carrotDOM.classList.add("selected");
-            carrotCakeDOM.classList.add("selected");
-        }else if (
-            (mode === "SMART" && carrotState[index]) ||
-            (mode === "DUMB" && index === carrotGoal)
-        ) {
-            carrotDOM.classList.add("selected");
-            carrotCakeDOM.classList.remove("selected");
-        } else {
-            carrotDOM.classList.remove("selected");
-            carrotCakeDOM.classList.remove("selected");
-        }
+        const item = mode === "SMART"
+          ? shelfState[index]
+          : index === carrotCakeGoal
+          ? 2
+          : index === carrotGoal
+            ? 1
+            : 0;
+        carrotDOM.classList.toggle("selected", item !== 0);
+        carrotCakeDOM.classList.toggle("selected", item === 2);
 
-        if (mode === "SMART" && index === carrotCakeScoreTarget) {
-            carrotDOM.classList.add("locked");
-            carrotCakeDOM.classList.add("locked");
-        } else if (mode === "SMART" && index === carrotScoreTarget) {
-            carrotDOM.classList.add("locked");
-            carrotCakeDOM.classList.remove("locked");
-        } else {
-            carrotDOM.classList.remove("locked");
-            carrotCakeDOM.classList.remove("locked");
-        }
+        carrotDOM.classList.toggle(
+          "locked",
+          mode === "SMART" &&
+          (index === carrotScoreTarget || index === carrotCakeScoreTarget)
+        );
+        carrotCakeDOM.classList.toggle(
+          "locked",
+          mode === "SMART" && index === carrotCakeScoreTarget
+        );
     })
   })
 
@@ -233,10 +222,9 @@ function updateUI() {
       let cakeCount = 0;
       
       for (let i = 0; i < 5; i++) {
-          count += (carrotState[getCarrotID({level, i})] || carrotCakeState[getCarrotID({level, i})])
-          ? 1
-          : 0;
-          cakeCount += (carrotCakeState[getCarrotID({level, i})]) ? 1 : 0;
+          const item = shelfState[getCarrotID({level, i})];
+          count += item !== 0 ? 1 : 0;
+          cakeCount += item === 2 ? 1 : 0;
       }
 
       if (
@@ -302,24 +290,24 @@ function updateUI() {
 
 function bind(element, callback) {
   let lastActivation = 0;
-  let activate = () => {
+  let activate = (event) => {
     if (new Date().getTime() - lastActivation > 250) {
-      callback();
+      callback(event);
       lastActivation = new Date().getTime();
     }
   };
 
   element.addEventListener("touchstart", (event) => {
     event.preventDefault();
-    activate();
+    activate(event);
   });
   element.addEventListener("click", (event) => {
     event.preventDefault();
-    activate();
+    activate(event);
   });
   element.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    activate();
+    activate(event);
   });
 }
 
@@ -352,8 +340,8 @@ window.addEventListener("load", () => {
                 return;
             }
             const id = getCarrotID({level, pos});
-            const offset = carrotState[id] ? 15 : 0;
-            ntClient.addSample(toRobotPrefix + carrotTopicName, id - offset);
+            shelfState[id] = shelfState[id] === 1 ? 0 : 1;
+            ntClient.addSample(toRobotPrefix + shelfTopicName, [...shelfState]);
         });
 
         bind(carrotCakeDOM, () => {
@@ -363,8 +351,8 @@ window.addEventListener("load", () => {
                 return;
             }
             const id = getCarrotID({level, pos});
-            const offset = carrotCakeState[id] ? 15 : 0;
-            ntClient.addSample(toRobotPrefix + carrotCakeTopicName, id - offset);
+            shelfState[id] = shelfState[id] === 2 ? 0 : 2;
+            ntClient.addSample(toRobotPrefix + shelfTopicName, [...shelfState]);
         });
     });
   });
@@ -439,18 +427,6 @@ function getCarrot(id) {
         level: Math.floor(id / 5),
         pos: id % 5,
     };
-}
-
-function convertIntToBooleanArr(n, len) {
-  if (typeof n !== "bigint") {
-    n = BigInt(n);
-  }
-  const arr = [];
-  for (let i = len - 1; i >= 0; i--) {
-    arr[i] = (n & 1n) === 1n;
-    n = n >> 1n;
-  }
-  return arr;
 }
 
 function unpackInt(n, totalBits, size) {
