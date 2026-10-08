@@ -1,0 +1,369 @@
+package frc.robot.subsystems.intake.slam;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.BatteryLogger;
+import frc.robot.RobotType;
+import frc.robot.RobotType.Mode;
+import frc.robot.constants.RobotConstants;
+import frc.robot.subsystems.ExtensionSystem;
+import frc.util.FFGains;
+import frc.util.LoggedTracer;
+import frc.util.NeutralMode;
+import frc.util.PIDGains;
+import frc.util.loggerUtil.tunables.LoggedTunable;
+import frc.util.loggerUtil.tunables.LoggedTunableNumber;
+import frc.util.robotStructure.angle.ArmMech;
+import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
+public class IntakeSlam extends SubsystemBase{
+	private final IntakeSlamIO io;
+	private final IntakeSlamIOInputsAutoLogged inputs = new IntakeSlamIOInputsAutoLogged();
+
+	private static final LoggedTunable<Angle> stowAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Stow/Angle", Degrees::of, 140.0);
+	private static final LoggedTunable<Angle> deployAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Deploy/Angle", Degrees::of, IntakeSlamConstants.minAngle.in(Degrees));
+	private static final LoggedTunable<Voltage> deployPushdownVolts = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Deploy/Pushdown Volts", Volts::of, -1.0);
+	private static final LoggedTunable<Angle> deployPushdownThreshold = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Deploy/Pushdown Threshold", Degrees::of, 2.0);
+
+	// private static final LoggedTunable<Angle> linearCompressStartAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Linear Compress/Start Angle", Degrees::of, 0.0);
+	// private static final LoggedTunable<Angle> linearCompressEndAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Linear Compress/End Angle", Degrees::of, 105.0);
+	// private static final LoggedTunable<Time> linearCompressTime = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Linear Compress/Time", Seconds::of, 2.0);
+
+	// private static final LoggedTunable<Angle> trigCompressStartAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Trig Compress/Start Angle", Degrees::of, 0.0);
+	// private static final LoggedTunable<Angle> trigCompressEndAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Trig Compress/End Angle", Degrees::of, 105.0);
+	// private static final LoggedTunable<Time> trigCompressTime = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Trig Compress/Time", Seconds::of, 2.0);
+
+	//private static final LoggedTunable<Angle> hopperAgitateStartAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Hopper Agitiate/Start Angle", Degrees::of, 0.0);
+	//private static final LoggedTunable<Angle> hopperAgitateEndAngle = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Hopper Agitiate/End Angle", Degrees::of, 85.0);
+	//private static final LoggedTunable<Time> hopperAgitatePeriod = LoggedTunable.from("Subsystems/Intake/Slam/Commands/Hopper Agitiate/Time", Seconds::of, 0.4);
+
+	private static final LoggedTunableNumber profilekV = LoggedTunable.from("Subsystems/Intake/Slam/Mechanism/Profile/kV", 1.5);
+	private static final LoggedTunableNumber profilekA = LoggedTunable.from("Subsystems/Intake/Slam/Mechanism/Profile/kA", 0.5);
+	private static final LoggedTunable<AngularVelocity> profileFastMaxVel = LoggedTunable.from("Subsystems/Intake/Slam/Mechanism/Fast Max Velocity", DegreesPerSecond::of, 0.0);
+	// private static final LoggedTunable<AngularVelocity> profileSlowMaxVel = LoggedTunable.from("Subsystems/Intake/Slam/Mechanism/Slow Max Velocity", DegreesPerSecond::of, 15.0);
+
+	private static final LoggedTunable<FFGains> ffConsts = LoggedTunable.from(
+		"Subsystems/Intake/Slam/Mechanism/FF",
+		new FFGains(
+			0.2,
+			0.5,
+			10.0,
+			0.25
+		)
+	);
+
+	private static final LoggedTunable<PIDGains> pidConsts = LoggedTunable.from(
+		"Subsystems/Intake/Slam/Mechanism/PID",
+		new PIDGains(
+			100.0,
+			0.0,
+			0.0
+		)
+	);
+
+	private final Alert motorDisconnectedAlert = new Alert("Subsystems/Intake/Slam/Alerts", "Motor Disconnected", AlertType.kError);
+	private final Alert motorDisconnectedGlobalAlert = new Alert("Intake Slam Motor Disconnected!", AlertType.kError);
+
+	public final ArmMech mech = new ArmMech(IntakeSlamConstants.mechBase3d);
+
+	@Getter
+	private double measuredAngleRads = 0.0;
+	@Getter
+	private double measuredVelocityRadsPerSec = 0.0;
+
+	@Getter
+	private double setpointAngleRads = 0.0;
+	@Getter
+	private double setpointVelocityRadsPerSec = 0.0;
+
+	public IntakeSlam(IntakeSlamIO io) {
+		super("Intake/Slam");
+
+		System.out.println("[Init IntakeSlam] Instantiating IntakeSlam with " + io.getClass().getSimpleName());
+		this.io = io;
+
+		final var sysidRoutine = new SysIdRoutine(
+			new SysIdRoutine.Config(
+				Volts.of(1.0).per(Second),
+				Volts.of(7.0),
+				Seconds.of(10.0),
+				(state) -> {
+					Logger.recordOutput("SysID/Intake-Slam/State", state.toString());
+				}
+			),
+			new SysIdRoutine.Mechanism(
+				(voltage) -> {
+					this.io.setVolts(voltage.in(Volts));
+				},
+				(log) -> {
+					Logger.recordOutput("SysID/Intake-Slam/Voltage", this.inputs.motor.motor.getAppliedVolts());
+					Logger.recordOutput("SysID/Intake-Slam/Position Rads", this.getMeasuredAngleRads());
+					Logger.recordOutput("SysID/Intake-Slam/Velocity RadsPerSec", this.getMeasuredVelocityRadsPerSec());
+				},
+				this,
+				"intake-slam"
+			)
+		);
+		SmartDashboard.putData("SysID/Intake/Slam/Quasi Forward", sysidRoutine.quasistatic(SysIdRoutine.Direction.kForward).until(() -> this.getMeasuredAngleRads() >= IntakeSlamConstants.maxAngle.in(Radians)));
+		SmartDashboard.putData("SysID/Intake/Slam/Quasi Reverse", sysidRoutine.quasistatic(SysIdRoutine.Direction.kReverse).until(() -> this.getMeasuredAngleRads() <= IntakeSlamConstants.minAngle.in(Radians)));
+		SmartDashboard.putData("SysID/Intake/Slam/Dynamic Forward", sysidRoutine.dynamic(SysIdRoutine.Direction.kForward).until(() -> this.getMeasuredAngleRads() >= IntakeSlamConstants.maxAngle.in(Radians)));
+		SmartDashboard.putData("SysID/Intake/Slam/Dynamic Reverse", sysidRoutine.dynamic(SysIdRoutine.Direction.kReverse).until(() -> this.getMeasuredAngleRads() <= IntakeSlamConstants.minAngle.in(Radians)));
+
+		if (!RobotConstants.tuningMode) {
+			this.io.configFF(IntakeSlam.ffConsts.get());
+			this.io.configPID(IntakeSlam.pidConsts.get());
+			this.io.configProfile(IntakeSlam.profilekV.getAsDouble(), IntakeSlam.profilekA.getAsDouble(), IntakeSlam.profileFastMaxVel.get().in(RadiansPerSecond));
+
+			this.io.configSend();
+		}
+
+		this.periodic();
+	}
+
+	@Override
+	public void periodic() {
+		LoggedTracer.logEpoch("CommandScheduler Periodic/Subsystem/Intake Slam/Before");
+		this.io.updateInputs(this.inputs);
+		LoggedTracer.logEpoch("CommandScheduler Periodic/Subsystem/Intake Slam/Update Inputs");
+		Logger.processInputs("Inputs/Intake/Slam", this.inputs);
+		LoggedTracer.logEpoch("CommandScheduler Periodic/Subsystem/Intake Slam/Process Inputs");
+
+		this.measuredAngleRads = IntakeSlamConstants.sensorToMechanism.applyUnsigned(this.inputs.encoder.getPositionRads() + IntakeSlamConstants.encoderZeroOffset.in(Radians));
+		this.measuredVelocityRadsPerSec = IntakeSlamConstants.sensorToMechanism.applyUnsigned(this.inputs.encoder.getVelocityRadsPerSec());
+
+		this.setpointAngleRads = this.inputs.motorProfilePositionRads + IntakeSlamConstants.sensorToMechanism.applyUnsigned(IntakeSlamConstants.encoderZeroOffset.in(Radians));
+		this.setpointVelocityRadsPerSec = this.inputs.motorProfileVelocityRadsPerSec;
+
+		Logger.recordOutput("Subsystems/Intake/Slam/Angle/Measured", this.getMeasuredAngleRads(), Radians);
+		Logger.recordOutput("Subsystems/Intake/Slam/Velocity/Measured", this.getMeasuredVelocityRadsPerSec(), RadiansPerSecond);
+		Logger.recordOutput("Subsystems/Intake/Slam/Angle/Setpoint", this.getSetpointAngleRads(), Radians);
+		Logger.recordOutput("Subsystems/Intake/Slam/Velocity/Setpoint", this.getSetpointVelocityRadsPerSec(), RadiansPerSecond);
+
+		this.mech.setRads(this.getMeasuredAngleRads());
+
+		var configChanged = false;
+		if (IntakeSlam.profilekV.hasChanged(this.hashCode()) | IntakeSlam.profilekV.hasChanged(this.hashCode())) {
+			if (IntakeSlam.profileFastMaxVel.hasChanged(this.hashCode())) {
+				this.io.configProfile(IntakeSlam.profilekV.getAsDouble(), IntakeSlam.profilekA.getAsDouble(), IntakeSlam.profileFastMaxVel.get().in(RadiansPerSecond));
+				configChanged = true;
+			}
+		}
+		if (IntakeSlam.ffConsts.hasChanged(this.hashCode())) {
+			this.io.configFF(IntakeSlam.ffConsts.get());
+			configChanged = true;
+		}
+		if (IntakeSlam.pidConsts.hasChanged(this.hashCode())) {
+			this.io.configPID(IntakeSlam.pidConsts.get());
+			configChanged = true;
+		}
+		if (configChanged) {
+			this.io.configSend();
+		}
+
+		this.motorDisconnectedAlert.set(!this.inputs.motorConnected);
+		this.motorDisconnectedGlobalAlert.set(!this.inputs.motorConnected);
+
+		if (RobotType.getMode() == Mode.REPLAY) {
+			BatteryLogger.getInstance().logMechanism(
+				"Intake/Slam",
+				this.inputs.motor.motor.getSupplyCurrentAmps()
+			);
+		}
+
+		LoggedTracer.logEpoch("CommandScheduler Periodic/Subsystem/Intake Slam/Periodic");
+		LoggedTracer.logEpoch("CommandScheduler Periodic/Subsystem/Intake Slam");
+	}
+
+	private void setAngleGoalRads(double angleRads) {
+		this.io.setPositionRads(angleRads - IntakeSlamConstants.encoderZeroOffset.in(Radians));
+		Logger.recordOutput("Subsystems/Intake/Slam/Angle/Goal", angleRads, Radians);
+		Logger.recordOutput("Subsystems/Intake/Slam/Angle/Motor Goal", angleRads - IntakeSlamConstants.encoderZeroOffset.in(Radians), Radians);
+	}
+
+	public Command coast() {
+		final var slam = this;
+		return new Command() {
+			{
+				this.setName("Coast");
+				this.addRequirements(slam);
+			}
+
+			@Override
+			public void initialize() {
+				slam.io.stop(NeutralMode.COAST);
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				slam.io.stop(NeutralMode.DEFAULT);
+			}
+
+			@Override
+			public boolean runsWhenDisabled() {
+				return true;
+			}
+		};
+	}
+
+	public Command stow() {
+		final var slam = this;
+		return new Command() {
+			{
+				this.setName("Stow");
+				this.addRequirements(slam);
+			}
+
+			@Override
+			public void execute() {
+				slam.setAngleGoalRads(IntakeSlam.stowAngle.get().in(Radians));
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				slam.io.stop(NeutralMode.DEFAULT);
+			}
+		};
+	}
+
+	// public Command hopperAgitate(ExtensionSystem extension) {
+	// 	final var slam = this;
+	// 	return new Command() {
+	// 		private final Timer agitateTimer = new Timer();
+
+	// 		{
+	// 			this.setName("Hopper Agitate");
+	// 			this.addRequirements(slam, extension);
+	// 		}
+
+	// 		@Override
+	// 		public void initialize() {
+	// 			this.agitateTimer.restart();
+	// 		}
+
+	// 		@Override
+	// 		public void execute() {
+	// 			if (this.agitateTimer.get() % (IntakeSlam.hopperAgitatePeriod.get().in(Seconds) * 2) < IntakeSlam.hopperAgitatePeriod.get().in(Seconds)) {
+	// 				slam.setAngleGoalRads(IntakeSlam.hopperAgitateEndAngle.get().in(Radians));
+	// 			} else {
+	// 				slam.setAngleGoalRads(IntakeSlam.hopperAgitateStartAngle.get().in(Radians));
+	// 			}
+	// 		}
+
+	// 		@Override
+	// 		public void end(boolean interrupted) {
+	// 			slam.io.stop(NeutralMode.DEFAULT);
+	// 			this.agitateTimer.stop();
+	// 		}
+	// 	};
+	// }
+
+	public Command deploy(ExtensionSystem extension) {
+		final var slam = this;
+		return new Command() {
+			{
+				this.setName("Deploy");
+				this.addRequirements(slam, extension);
+			}
+
+			@Override
+			public void execute() {
+				if (slam.getMeasuredAngleRads() < IntakeSlam.deployPushdownThreshold.get().in(Radians)) {
+					slam.io.setVolts(IntakeSlam.deployPushdownVolts.get().in(Volts));
+				} else {
+					slam.setAngleGoalRads(IntakeSlam.deployAngle.get().in(Radians));
+				}
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				slam.io.stop(NeutralMode.DEFAULT);
+			}
+		};
+	}
+
+	// public Command linearCompress(ExtensionSystem extension) {
+	// 	final var slam = this;
+	// 	return new Command() {
+	// 		private final Timer timer = new Timer();
+
+	// 		{
+	// 			this.setName("Linear Compress");
+	// 			this.addRequirements(slam, extension);
+	// 		}
+
+	// 		@Override
+	// 		public void initialize() {
+	// 			this.timer.restart();
+	// 		}
+
+	// 		@Override
+	// 		public void execute() {
+	// 			final var goalRads = MathUtil.interpolate(
+	// 				IntakeSlam.linearCompressStartAngle.get().in(Radians),
+	// 				IntakeSlam.linearCompressEndAngle.get().in(Radians),
+	// 				this.timer.get() / IntakeSlam.linearCompressTime.get().in(Seconds)
+	// 			);
+	// 			slam.setAngleGoalRads(goalRads);
+	// 		}
+
+	// 		@Override
+	// 		public void end(boolean interrupted) {
+	// 			this.timer.stop();
+	// 			slam.io.stop(NeutralMode.DEFAULT);
+	// 		}
+	// 	};
+	// }
+
+	// public Command trigCompress(ExtensionSystem extension) {
+	// 	final var slam = this;
+	// 	return new Command() {
+	// 		private final Timer timer = new Timer();
+
+	// 		{
+	// 			this.setName("Trig Compress");
+	// 			this.addRequirements(slam, extension);
+	// 		}
+
+	// 		@Override
+	// 		public void initialize() {
+	// 			this.timer.restart();
+	// 		}
+
+	// 		@Override
+	// 		public void execute() {
+	// 			final var goalRads =
+	// 				Math.acos(
+	// 					MathUtil.interpolate(
+	// 						Math.cos(IntakeSlam.trigCompressStartAngle.get().in(Radians)),
+	// 						Math.cos(IntakeSlam.trigCompressEndAngle.get().in(Radians)),
+	// 						this.timer.get() / IntakeSlam.trigCompressTime.get().in(Seconds)
+	// 					)
+	// 				)
+	// 			;
+	// 			slam.setAngleGoalRads(goalRads);
+	// 		}
+
+	// 		@Override
+	// 		public void end(boolean interrupted) {
+	// 			this.timer.stop();
+	// 			slam.io.stop(NeutralMode.DEFAULT);
+	// 		}
+	// 	};
+	// }
+}
