@@ -241,38 +241,6 @@ public class IntakeSlam extends SubsystemBase{
 		};
 	}
 
-	// public Command hopperAgitate(ExtensionSystem extension) {
-	// 	final var slam = this;
-	// 	return new Command() {
-	// 		private final Timer agitateTimer = new Timer();
-
-	// 		{
-	// 			this.setName("Hopper Agitate");
-	// 			this.addRequirements(slam, extension);
-	// 		}
-
-	// 		@Override
-	// 		public void initialize() {
-	// 			this.agitateTimer.restart();
-	// 		}
-
-	// 		@Override
-	// 		public void execute() {
-	// 			if (this.agitateTimer.get() % (IntakeSlam.hopperAgitatePeriod.get().in(Seconds) * 2) < IntakeSlam.hopperAgitatePeriod.get().in(Seconds)) {
-	// 				slam.setAngleGoalRads(IntakeSlam.hopperAgitateEndAngle.get().in(Radians));
-	// 			} else {
-	// 				slam.setAngleGoalRads(IntakeSlam.hopperAgitateStartAngle.get().in(Radians));
-	// 			}
-	// 		}
-
-	// 		@Override
-	// 		public void end(boolean interrupted) {
-	// 			slam.io.stop(NeutralMode.DEFAULT);
-	// 			this.agitateTimer.stop();
-	// 		}
-	// 	};
-	// }
-
 	public Command deploy(ExtensionSystem extension) {
 		final var slam = this;
 		return new Command() {
@@ -296,74 +264,4 @@ public class IntakeSlam extends SubsystemBase{
 			}
 		};
 	}
-
-	// public Command linearCompress(ExtensionSystem extension) {
-	// 	final var slam = this;
-	// 	return new Command() {
-	// 		private final Timer timer = new Timer();
-
-	// 		{
-	// 			this.setName("Linear Compress");
-	// 			this.addRequirements(slam, extension);
-	// 		}
-
-	// 		@Override
-	// 		public void initialize() {
-	// 			this.timer.restart();
-	// 		}
-
-	// 		@Override
-	// 		public void execute() {
-	// 			final var goalRads = MathUtil.interpolate(
-	// 				IntakeSlam.linearCompressStartAngle.get().in(Radians),
-	// 				IntakeSlam.linearCompressEndAngle.get().in(Radians),
-	// 				this.timer.get() / IntakeSlam.linearCompressTime.get().in(Seconds)
-	// 			);
-	// 			slam.setAngleGoalRads(goalRads);
-	// 		}
-
-	// 		@Override
-	// 		public void end(boolean interrupted) {
-	// 			this.timer.stop();
-	// 			slam.io.stop(NeutralMode.DEFAULT);
-	// 		}
-	// 	};
-	// }
-
-	// public Command trigCompress(ExtensionSystem extension) {
-	// 	final var slam = this;
-	// 	return new Command() {
-	// 		private final Timer timer = new Timer();
-
-	// 		{
-	// 			this.setName("Trig Compress");
-	// 			this.addRequirements(slam, extension);
-	// 		}
-
-	// 		@Override
-	// 		public void initialize() {
-	// 			this.timer.restart();
-	// 		}
-
-	// 		@Override
-	// 		public void execute() {
-	// 			final var goalRads =
-	// 				Math.acos(
-	// 					MathUtil.interpolate(
-	// 						Math.cos(IntakeSlam.trigCompressStartAngle.get().in(Radians)),
-	// 						Math.cos(IntakeSlam.trigCompressEndAngle.get().in(Radians)),
-	// 						this.timer.get() / IntakeSlam.trigCompressTime.get().in(Seconds)
-	// 					)
-	// 				)
-	// 			;
-	// 			slam.setAngleGoalRads(goalRads);
-	// 		}
-
-	// 		@Override
-	// 		public void end(boolean interrupted) {
-	// 			this.timer.stop();
-	// 			slam.io.stop(NeutralMode.DEFAULT);
-	// 		}
-	// 	};
-	// }
 }
