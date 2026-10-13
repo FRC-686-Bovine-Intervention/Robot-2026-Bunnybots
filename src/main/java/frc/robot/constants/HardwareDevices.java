@@ -47,8 +47,11 @@ public class HardwareDevices {
 	public static final CANDevice intakeRightRollerMotorID = rio.id(7);
 
 	// Rollers
+	// | Kicker
+	public static final CANDevice kickerMotorID = canivore.id(10);
 	// | Indexer
-	public static final CANDevice indexerMotorID = rio.id(8);
+	public static final CANDevice indexerLeftMotorID = rio.id(5);
+	public static final CANDevice indexerRightMotorID = rio.id(6);
 	// | Feeder
 	public static final CANDevice leftFeederMotorID = rio.id(10);
 	public static final CANDevice rightFeederMotorID = rio.id(9);
