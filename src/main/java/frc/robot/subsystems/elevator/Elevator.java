@@ -10,6 +10,8 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.util.FFConstants;
 import frc.util.LoggedTracer;
 import frc.util.NeutralMode;
@@ -19,6 +21,7 @@ import frc.util.robotStructure.linear.ExtenderMech;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
@@ -29,7 +32,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 
-public class Elevator {
+public class Elevator extends SubsystemBase {
 	private final ElevatorIO io;
 	private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
@@ -171,5 +174,83 @@ public class Elevator {
 	public void stop(Optional<NeutralMode> neutralMode) {
 		this.motionProfiling = false;
 		this.io.stop(neutralMode);
+	}
+	public Command stow() {
+		final var elevator = this;
+		return new Command() {
+			{
+				this.setName("Stow");
+				this.addRequirements(elevator);
+			}
+
+			@Override
+			public void execute() {
+				var goalLengthMeters = Elevator.autoRezeroMaxLength.get().in(Meters);
+				Logger.recordOutput("Subsystems/Elevator/Length/Goal", goalLengthMeters, Meters);
+				if (elevator.getLengthMeters() <= 2) {
+					elevator.io.setVolts(2);
+				} else {
+					var goalAngleRads = ElevatorConstants.motorToMechanism.inverse().applyUnsigned(ElevatorConstants.stage1LinearRelation.metersToRadians(goalLengthMeters));
+					elevator.io.setPosition(goalAngleRads, velocityMetersPerSec, lengthMeters);
+				}
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				elevator.io.stop(NeutralMode.DEFAULT);
+			}
+		};
+	}
+	public Command coast() {
+		final var elevator = this;
+		return new Command() {
+			{
+				this.setName("Coast");
+				this.addRequirements(elevator);
+			}
+
+			@Override
+			public void initialize() {
+				elevator.io.stop(NeutralMode.COAST);
+			}
+			
+			@Override
+			public void end(boolean interrupted) {
+				elevator.io.stop(NeutralMode.DEFAULT);
+			}
+
+			@Override
+			public boolean runsWhenDisabled() {
+				return true;
+			}
+		};
+	}
+	private Command goToPositionCommand(String name, DoubleSupplier lengthMetersSupplier) {
+		final var elevator = this;
+		return new Command() {
+			{
+				this.setName(name);
+				this.addRequirements(elevator);
+			}
+
+			@Override
+			public void execute() {
+				var goalLengthMeters = lengthMetersSupplier.getAsDouble();
+				var goalAngleRads = ElevatorConstants.motorToMechanism.inverse().applyUnsigned(ElevatorConstants.stage1LinearRelation.metersToRadians(goalLengthMeters));
+				elevator.io.setPosition(goalAngleRads, velocityMetersPerSec, lengthMeters);
+				Logger.recordOutput("Subsystems/Elevator/Elevator/Length/Goal", goalLengthMeters, Meters);
+			}
+
+			@Override
+			public void end(boolean interrupted) {
+				elevator.io.stop(NeutralMode.DEFAULT);
+			}
+		};
+	}
+	public Command goToPosition(DoubleSupplier position) {
+		return this.goToPositionCommand(
+			"Climb",
+			() -> position.getAsDouble()
+		);
 	}
 }
