@@ -1,12 +1,5 @@
 package frc.robot.constants;
 
-import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Seconds;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Frequency;
@@ -14,6 +7,13 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.Robot;
+
+import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Seconds;
 
 public final class RobotConstants {
 	public static final boolean tuningMode = false;
@@ -48,4 +48,7 @@ public final class RobotConstants {
 	public static final Time rioUpdatePeriod = Seconds.of(rioUpdatePeriodSecs);
 	public static final Frequency rioUpdateFrequency = rioUpdatePeriod.asFrequency();
 	public static final double rioUpdateFrequencyHz = rioUpdateFrequency.in(Hertz);
+
+	public static final double deviceFaultUpdateFrequencyHz = 0;
+	public static final Frequency deviceFaultUpdateFrequency = Hertz.of(deviceFaultUpdateFrequencyHz);
 }
