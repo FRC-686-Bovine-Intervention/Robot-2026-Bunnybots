@@ -4,10 +4,10 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.util.flipping.AllianceFlipped;
 
 public final class FieldConstants {
@@ -20,7 +20,7 @@ public final class FieldConstants {
 	static {
 		AprilTagFieldLayout a = null;
 		try {
-			a = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+			a = AprilTagFieldLayout.loadFromResource(Filesystem.getDeployDirectory().getAbsolutePath() + "/Bunnybots_2026.json");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
