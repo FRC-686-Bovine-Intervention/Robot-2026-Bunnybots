@@ -1,0 +1,310 @@
+{
+ "name":"Bunnybots",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{
+   "CarrotDiameter":{
+    "dimension":"Length",
+    "var":{
+     "exp":"6 in",
+     "val":0.15239999999999998
+    }
+   },
+   "CarrotFiveCenterY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"PrestagedCarrotsLowerY + CarrotDiameter / 2",
+     "val":1.9812
+    }
+   },
+   "CarrotFourCenterY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"CarrotFourLowerY + CarrotLength / 2",
+     "val":3.048
+    }
+   },
+   "CarrotFourLowerY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"111 in",
+     "val":2.8194
+    }
+   },
+   "CarrotLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"18 in",
+     "val":0.4572
+    }
+   },
+   "CarrotOneCenterY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"FieldWidth - CarrotFiveCenterY",
+     "val":6.248399999999999
+    }
+   },
+   "CarrotThreeCenterY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"FieldWidth / 2",
+     "val":4.1148
+    }
+   },
+   "CarrotTwoCenterY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"FieldWidth - CarrotFourCenterY",
+     "val":5.1815999999999995
+    }
+   },
+   "CenterToBumper":{
+    "dimension":"Length",
+    "var":{
+     "exp":"18.625 in",
+     "val":0.473075
+    }
+   },
+   "FieldLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"54 ft",
+     "val":16.4592
+    }
+   },
+   "FieldWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"27 ft",
+     "val":8.2296
+    }
+   },
+   "InnerKitchenLineLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"FieldWidth - KitchenLowerY - OuterKitchenExtension",
+     "val":4.444212599999999
+    }
+   },
+   "InnerKitchenLineToWall":{
+    "dimension":"Length",
+    "var":{
+     "exp":"75.5 in",
+     "val":1.9177
+    }
+   },
+   "KitchenLowerY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"106.031 in",
+     "val":2.6931874
+    }
+   },
+   "OuterKitchenExtension":{
+    "dimension":"Length",
+    "var":{
+     "exp":"43 in",
+     "val":1.0922
+    }
+   },
+   "PrestagedCarrotsLineLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"FieldWidth - PrestagedCarrotsLowerY * 2",
+     "val":4.419599999999999
+    }
+   },
+   "PrestagedCarrotsLowerY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"75 in",
+     "val":1.905
+    }
+   },
+   "PrestagedCarrotsToCenterLine":{
+    "dimension":"Length",
+    "var":{
+     "exp":"84 in",
+     "val":2.1336
+    }
+   },
+   "PrestagedCarrotsX":{
+    "dimension":"Length",
+    "var":{
+     "exp":"FieldLength / 2 - PrestagedCarrotsToCenterLine",
+     "val":6.096
+    }
+   },
+   "ShelfThickness":{
+    "dimension":"Length",
+    "var":{
+     "exp":"7 in",
+     "val":0.1778
+    }
+   }
+  },
+  "poses":{
+   "CarrotThreePose":{
+    "x":{
+     "exp":"PrestagedCarrotsX",
+     "val":6.096
+    },
+    "y":{
+     "exp":"CarrotThreeCenterY",
+     "val":4.1148
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "CenterKitchenLineStartingPose":{
+    "x":{
+     "exp":"CenterToBumper + InnerKitchenLineToWall",
+     "val":2.390775
+    },
+    "y":{
+     "exp":"InnerKitchenLineLength / 2 + KitchenLowerY",
+     "val":4.915293699999999
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "OvenKitchenLineStartingPose":{
+    "x":{
+     "exp":"CenterToBumper + InnerKitchenLineToWall",
+     "val":2.390775
+    },
+    "y":{
+     "exp":"KitchenLowerY + CenterToBumper",
+     "val":3.1662624000000004
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "OvenStartingPose":{
+    "x":{
+     "exp":"CenterToBumper",
+     "val":0.473075
+    },
+    "y":{
+     "exp":"KitchenLowerY + CenterToBumper",
+     "val":3.1662624000000004
+    },
+    "heading":{
+     "exp":"-90 deg",
+     "val":-1.5707963267948966
+    }
+   },
+   "ShelfStartingPose":{
+    "x":{
+     "exp":"CenterToBumper",
+     "val":0.473075
+    },
+    "y":{
+     "exp":"FieldWidth - ShelfThickness - CenterToBumper",
+     "val":7.578725
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
+    }
+   },
+   "UpperKitchenLineStartingPose":{
+    "x":{
+     "exp":"CenterToBumper + InnerKitchenLineToWall",
+     "val":2.390775
+    },
+    "y":{
+     "exp":"KitchenLowerY + InnerKitchenLineLength - CenterToBumper",
+     "val":6.664325
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"150 lbs",
+   "val":68.0388555
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"6.5",
+   "val":6.5
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"6000 RPM",
+   "val":628.3185307179587
+  },
+  "tmax":{
+   "exp":"1.2 N * m",
+   "val":1.2
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
+  },
+  "bumper":{
+   "front":{
+    "exp":"18.625 in",
+    "val":0.473075
+   },
+   "side":{
+    "exp":"18.625 in",
+    "val":0.473075
+   },
+   "back":{
+    "exp":"18.625 in",
+    "val":0.473075
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":null,
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}
