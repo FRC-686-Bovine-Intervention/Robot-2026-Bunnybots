@@ -1,28 +1,18 @@
 package frc.robot.constants;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.util.flipping.AllianceFlipped;
-import frc.util.geometry.PoseBoundingBoxUtil.BoundingBox;
-import frc.util.geometry.PoseBoundingBoxUtil.OrBox;
-import frc.util.geometry.PoseBoundingBoxUtil.RectangularBoundingBox;
-import frc.util.geometry.PoseBoundingBoxUtil.VerticalLine;
 
 public final class FieldConstants {
-	public static final Distance fieldLength = Inches.of(651.2);
-	public static final Distance fieldWidth =  Inches.of(317.7);
+	public static final Distance fieldLength = Feet.of(54);
+	public static final Distance fieldWidth =  Feet.of(27);
 
 	// public static final AllianceFlipped<VerticalLine> allianceBox = AllianceFlipped.fromBlue(new VerticalLine(fieldLength.div(2.0).in(Meters), false));
 
@@ -30,243 +20,42 @@ public final class FieldConstants {
 	static {
 		AprilTagFieldLayout a = null;
 		try {
-			a = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+			a = AprilTagFieldLayout.loadFromResource(Filesystem.getDeployDirectory().getAbsolutePath() + "/Bunnybots_2026.json");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		apriltagLayout = a;
 	}
 
-	public static final AllianceFlipped<Distance> allianceZoneBoundaryX = AllianceFlipped.fromBlueXPos(Inches.of(158.600000));
-	private static final Distance allianceTapeWidth = Inches.of(2);
-	public static final AllianceFlipped<Distance> robotStartingLineCenterX = AllianceFlipped.fromBlueXPos(allianceZoneBoundaryX.getBlue().minus(allianceTapeWidth.div(2.0)));
-	public static final AllianceFlipped<Distance> barrierCenterX = AllianceFlipped.fromBlueXPos(Inches.of(182.100000));
+	public static final Distance carrotDiameter = Inches.of(6);
+	public static final Distance carrotLength = Inches.of(18);
 
-	public static final AllianceFlipped<Translation2d> hubCenter = AllianceFlipped.fromBlue(new Translation2d(
-		barrierCenterX.getBlue(),
-		fieldWidth.div(2.0)
-	));
-	public static final Distance hubHeight = Inches.of(72.000000);
-	public static final Distance hubWidth = Inches.of(47.0);
+	public static final Distance innerKitchenLineToWall = Inches.of(75.5);
+	public static final Distance kitchenLowerY = Inches.of(106.031);
+	public static final Distance kitchenUpperY = fieldWidth;
+	public static final Distance outerKitchenLineToWall = Inches.of(125);
+	public static final Distance outerKitchenExtension = Inches.of(43);
+	public static final Distance outerKitchenExtensionY = fieldWidth.minus(outerKitchenExtension);
+	public static final Distance innerKitchenLineLength = fieldWidth.minus(kitchenLowerY).minus(outerKitchenExtension);
+	public static final Distance shelfThickness = Inches.of(7);
+	public static final Distance shelfLength = Inches.of(97);
+	public static final Distance shelfToDriverStation = Inches.of(12);
+	public static final Distance tapeThickness = Inches.of(2);
 
-	public static final AllianceFlipped<Translation2d> towerRungsCenter = AllianceFlipped.fromBlue(new Translation2d(
-		Inches.of(41.798750),
-		Inches.of(147.475)
-	));
-	public static final Distance towerInnerUprightDistance = Inches.of(32.250000);
+	public static final Distance prestagedCarrotsToCenterLine = Inches.of(84);
+	public static final Distance prestagedCarrotsLowerY = Inches.of(75);
+	public static final Distance prestagedCarrotsLineLength = fieldWidth.minus(prestagedCarrotsLowerY).minus(prestagedCarrotsLowerY);
 
-	public static final AllianceFlipped<Distance> outpostCenterY = AllianceFlipped.fromBlueYPos(Inches.of(26.150500));
+	public static final Distance carrotFourLowerY = Inches.of(111);
+	public static final Distance carrotFiveCenterY = prestagedCarrotsLowerY.plus(carrotDiameter.div(2));
+	public static final Distance carrotFourCenterY = carrotFourLowerY.plus(carrotLength.div(2));
+	public static final Distance carrotThreeCenterY = fieldWidth.div(2);
+	public static final Distance carrotTwoCenterY = fieldWidth.minus(carrotFourCenterY);
+	public static final Distance carrotOneCenterY = fieldWidth.minus(carrotFiveCenterY);
 
-	public static final AllianceFlipped<VerticalLine> allianceZone = AllianceFlipped.fromBlue(new VerticalLine(allianceZoneBoundaryX.getBlue().in(Meters), false));
-	public static final AllianceFlipped<VerticalLine> shootingZone = AllianceFlipped.fromBlue(new VerticalLine(allianceZoneBoundaryX.getBlue().plus(hubWidth).in(Meters), false));
-
-	public static final Angle bumpAngle = Degrees.of(15.0);
-	public static final Distance bumpHeight = Inches.of(6.5);
-	public static final Distance bumpWidth = Inches.of(73.000000);
-	public static final Distance bumpLength = bumpHeight.div(Math.tan(bumpAngle.in(Radians))).times(2.0);
-
-
-	public static final Distance bottomBumpTopY = fieldWidth.div(2.0).minus(hubWidth.div(2.0));
-	public static final Distance bottomBumpBottomY = bottomBumpTopY.minus(bumpWidth);
-	public static final Distance topBumpTopY = fieldWidth.div(2.0).plus(hubWidth.div(2.0));
-	public static final Distance topBumpBottomY = topBumpTopY.plus(bumpWidth);
-
-	public static final AllianceFlipped<RectangularBoundingBox> bottomBump = AllianceFlipped.fromBlue(BoundingBox.rectangle(
-		new Translation2d(
-			barrierCenterX.getBlue().minus(bumpLength.div(2.0)),
-			bottomBumpBottomY
-		),
-		new Translation2d(
-			barrierCenterX.getBlue().plus(bumpLength.div(2.0)),
-			bottomBumpTopY
-		)
-	));
-	public static final AllianceFlipped<RectangularBoundingBox> topBump = AllianceFlipped.fromBlue(BoundingBox.rectangle(
-		new Translation2d(
-			barrierCenterX.getBlue().minus(bumpLength.div(2.0)),
-			topBumpBottomY
-		),
-		new Translation2d(
-			barrierCenterX.getBlue().plus(bumpLength.div(2.0)),
-			topBumpTopY
-		)
-	));
-
-	public static final AllianceFlipped<OrBox> anyBump = AllianceFlipped.fromFunction((alliance) -> bottomBump.get(alliance).or(topBump.get(alliance)));
-
-	public static final AllianceFlipped<Distance> bumpInnerX = new AllianceFlipped<Distance>(
-		barrierCenterX.getBlue().minus(bumpLength.div(2.0)),
-		barrierCenterX.getRed().plus(bumpLength.div(2.0))
-	);
-
-	public static final AllianceFlipped<Distance> bumpOuterX = new AllianceFlipped<Distance>(
-		barrierCenterX.getBlue().plus(bumpLength.div(2.0)),
-		barrierCenterX.getRed().minus(bumpLength.div(2.0))
-	);
-
-	public static final AllianceFlipped<Distance> trenchInnerX = new AllianceFlipped<Distance>(
-		barrierCenterX.getBlue().minus(bumpLength.div(2.0)),
-		barrierCenterX.getRed().plus(bumpLength.div(2.0))
-	);
-
-	public static final AllianceFlipped<Distance> trenchOuterX = new AllianceFlipped<Distance>(
-		barrierCenterX.getBlue().plus(bumpLength.div(2.0)),
-		barrierCenterX.getRed().minus(bumpLength.div(2.0))
-	);
-
-	public static final Distance bottomTrenchTopY = fieldWidth.div(2.0).minus(hubWidth.div(2.0)).minus(bumpWidth);
-	public static final Distance bottomTrenchBottomY = Inches.of(-60);
-	public static final Distance topTrenchTopY = fieldWidth.div(2.0).plus(hubWidth.div(2.0)).plus(bumpWidth);
-	public static final Distance topTrenchBottomY = fieldWidth.plus(Inches.of(60));
-
-	public static final AllianceFlipped<RectangularBoundingBox> bottomTrench = AllianceFlipped.fromBlue(BoundingBox.rectangle(
-		new Translation2d(
-			barrierCenterX.getBlue().minus(bumpLength.div(2.0)),
-			bottomTrenchBottomY
-
-		), new Translation2d(
-			barrierCenterX.getBlue().plus(bumpLength.div(2.0)),
-			bottomTrenchTopY
-		)
-	));
-	public static final AllianceFlipped<RectangularBoundingBox> topTrench = AllianceFlipped.fromBlue(BoundingBox.rectangle(
-		new Translation2d(
-			barrierCenterX.getBlue().minus(bumpLength.div(2.0)),
-			topTrenchBottomY
-		),
-		new Translation2d(
-			barrierCenterX.getBlue().plus(bumpLength.div(2.0)),
-			topTrenchTopY
-		)
-	));
-	public static final AllianceFlipped<OrBox> anyTrench = AllianceFlipped.fromFunction((alliance) -> bottomTrench.get(alliance).or(topTrench.get(alliance)));
-
-
-
-
-	public static final AllianceFlipped<Pose2d> hubFlatFrontRobotPose = AllianceFlipped.fromBlue(new Pose2d(
-		new Translation2d(
-			allianceZoneBoundaryX.getBlue().minus(RobotConstants.centerToFrontBumper),
-			hubCenter.getBlue().getMeasureY()
-		),
-		Rotation2d.kZero
-	));
-	public static final AllianceFlipped<Pose2d> hubIntakeFrontRobotPose = AllianceFlipped.fromBlue(new Pose2d(
-		new Translation2d(
-			allianceZoneBoundaryX.getBlue().minus(RobotConstants.centerToFrontFrame).minus(Inches.of(12.0)),
-			hubCenter.getBlue().getMeasureY()
-		),
-		Rotation2d.kZero
-	));
-	public static final AllianceFlipped<Pose2d> leftTrenchPresetShotPose = AllianceFlipped.fromBlue(new Pose2d(
-		new Translation2d(
-			Meter.of(3.576365),
-			fieldWidth.minus(Meter.of(1.565505))
-		),
-		Rotation2d.fromRadians(1.1823833).unaryMinus()
-	));
-	public static final AllianceFlipped<Pose2d> rightTrenchPresetShotPose = AllianceFlipped.fromBlue(new Pose2d(
-		new Translation2d(
-			Meter.of(3.576365),
-			Meter.of(1.565505)
-		),
-		Rotation2d.fromRadians(1.1823833)
-	));
-	public static final AllianceFlipped<Pose2d> towerPresetShotPose = AllianceFlipped.fromBlue(new Pose2d(
-		new Translation2d(
-			Meter.of(0.93573111),
-			Meter.of(4.625235)
-		),
-		Rotation2d.fromRadians(-0.177596)
-	));
-
-	public static final AllianceFlipped<Translation3d> hubAimPoint = AllianceFlipped.fromBlue(new Translation3d(
-		hubCenter.getBlue().getMeasureX(),
-		hubCenter.getBlue().getMeasureY(),
-		hubHeight
-	));
-
-	public static final AllianceFlipped<Translation3d> leftPassPoint = AllianceFlipped.fromBlue(new Translation3d(
-		Inches.zero().plus(hubCenter.getBlue().getMeasureX()).div(2.0),
-		fieldWidth.div(4).times(3),
-		hubHeight
-	));
-
-	public static final AllianceFlipped<Translation3d> rightPassPoint = AllianceFlipped.fromBlue(new Translation3d(
-		Inches.zero().plus(hubCenter.getBlue().getMeasureX()).div(2.0),
-		fieldWidth.div(4).times(1),
-		hubHeight
-	));
-
-	public static final AllianceFlipped<Translation3d> topPassPoint = new AllianceFlipped<>(leftPassPoint.getBlue(), rightPassPoint.getRed());
-	public static final AllianceFlipped<Translation3d> botPassPoint = new AllianceFlipped<>(rightPassPoint.getBlue(), leftPassPoint.getRed());
-
-
-
-	public static final AllianceFlipped<int[]> hubTagIDs = new AllianceFlipped<>(
-		new int[] {
-			25,
-			26,
-			27,
-			18,
-			19,
-			20,
-			21,
-			24,
-		},
-		new int[] {
-			9,
-			10,
-			11,
-			2,
-			3,
-			4,
-			5,
-			8,
-		}
-	);
-
-	public static final AllianceFlipped<int[]> towerTagIDs = new AllianceFlipped<>(
-		new int[] {
-			31,
-			32,
-		},
-		new int[] {
-			15,
-			16,
-		}
-	);
-
-	public static final AllianceFlipped<int[]> outpostTagIDs = new AllianceFlipped<>(
-		new int[] {
-			29,
-			30,
-		},
-		new int[] {
-			13,
-			14,
-		}
-	);
-
-	public static final AllianceFlipped<int[]> leftTrenchTagIDs = new AllianceFlipped<>(
-		new int[] {
-			23,
-			22,
-		},
-		new int[] {
-			7,
-			8,
-		}
-	);
-
-	public static final AllianceFlipped<int[]> rightTrenchTagIDs = new AllianceFlipped<>(
-		new int[] {
-			28,
-			17,
-		},
-		new int[] {
-			12,
-			1,
-		}
-	);
+	public static final AllianceFlipped<Pose2d> ovenStartingPose = AllianceFlipped.fromBlue(new Pose2d(RobotConstants.centerToSideBumper, kitchenLowerY.plus(RobotConstants.centerToFrontBumper), Rotation2d.kCW_90deg));
+	public static final AllianceFlipped<Pose2d> ovenKitchenLineStartingPose = AllianceFlipped.fromBlue(new Pose2d(innerKitchenLineToWall.minus(RobotConstants.centerToFrontBumper), kitchenLowerY.plus(RobotConstants.centerToSideBumper), Rotation2d.kZero));
+	public static final AllianceFlipped<Pose2d> centerKitchenLineStartingPose = AllianceFlipped.fromBlue(new Pose2d(innerKitchenLineToWall.minus(RobotConstants.centerToFrontBumper), kitchenLowerY.plus(innerKitchenLineLength.div(2.0)), Rotation2d.kZero));
+	public static final AllianceFlipped<Pose2d> upperKitchenLineStartingPose = AllianceFlipped.fromBlue(new Pose2d(innerKitchenLineToWall.minus(RobotConstants.centerToFrontBumper), kitchenLowerY.plus(innerKitchenLineLength).minus(RobotConstants.centerToSideBumper), Rotation2d.kZero));
+	public static final AllianceFlipped<Pose2d> shelfStartingPose = AllianceFlipped.fromBlue(new Pose2d(RobotConstants.centerToSideBumper, kitchenUpperY.minus(shelfThickness).minus(RobotConstants.centerToFrontBumper), Rotation2d.kCCW_90deg));
 }

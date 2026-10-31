@@ -21,8 +21,8 @@ public final class RobotConstants {
 	public static final Mass robotWeight = Pounds.of(125);
 	public static final MomentOfInertia robotMOI = KilogramSquareMeters.of(6);
 
-	public static final Distance frameLength = Inches.of(27.0);
-	public static final Distance frameWidth = Inches.of(27.0);
+	public static final Distance frameLength = Inches.of(30.0);
+	public static final Distance frameWidth = Inches.of(30.0);
 
 	public static final Distance centerToFrontFrame = frameLength.div(2.0);
 	public static final Distance centerToSideFrame = frameWidth.div(2.0);
