@@ -146,6 +146,48 @@
    }
   },
   "poses":{
+   "CarrotFivePose":{
+    "x":{
+     "exp":"PrestagedCarrotsX",
+     "val":6.096
+    },
+    "y":{
+     "exp":"CarrotFiveCenterY",
+     "val":1.9812
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "CarrotFourPose":{
+    "x":{
+     "exp":"PrestagedCarrotsX",
+     "val":6.096
+    },
+    "y":{
+     "exp":"CarrotFourCenterY",
+     "val":3.048
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "CarrotOnePose":{
+    "x":{
+     "exp":"PrestagedCarrotsX",
+     "val":6.096
+    },
+    "y":{
+     "exp":"CarrotOneCenterY",
+     "val":6.248399999999999
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
    "CarrotThreePose":{
     "x":{
      "exp":"PrestagedCarrotsX",
@@ -154,6 +196,20 @@
     "y":{
      "exp":"CarrotThreeCenterY",
      "val":4.1148
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "CarrotTwoPose":{
+    "x":{
+     "exp":"PrestagedCarrotsX",
+     "val":6.096
+    },
+    "y":{
+     "exp":"CarrotTwoCenterY",
+     "val":5.1815999999999995
     },
     "heading":{
      "exp":"0 rad",
