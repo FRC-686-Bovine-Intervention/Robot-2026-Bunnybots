@@ -230,6 +230,20 @@
      "val":0.0
     }
    },
+   "OvenKitchenLineAvoid":{
+    "x":{
+     "exp":"92.25 in + CenterToBumper + 3 in",
+     "val":2.892425
+    },
+    "y":{
+     "exp":"KitchenLowerY + CenterToBumper + 3 in",
+     "val":3.2424624000000004
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
    "OvenKitchenLineStartingPose":{
     "x":{
      "exp":"CenterToBumper + InnerKitchenLineToWall",
