@@ -109,6 +109,13 @@
      "val":1.0922
     }
    },
+   "OvenLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"92.25 in",
+     "val":2.34315
+    }
+   },
    "PrestagedCarrotsLineLength":{
     "dimension":"Length",
     "var":{
@@ -232,7 +239,7 @@
    },
    "OvenKitchenLineAvoid":{
     "x":{
-     "exp":"92.25 in + CenterToBumper + 3 in",
+     "exp":"OvenLength + CenterToBumper + 3 in",
      "val":2.892425
     },
     "y":{
