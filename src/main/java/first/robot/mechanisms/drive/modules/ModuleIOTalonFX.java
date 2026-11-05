@@ -39,13 +39,15 @@ public class ModuleIOTalonFX implements ModuleIO {
     
     private final TalonFXConfiguration driveConfig = new TalonFXConfiguration();
     private final TalonFXConfiguration azimuthConfig = new TalonFXConfiguration();
+	private final CANCoderConfiguration encoderConfig = new CANCoderConfiguration();
 
     private final BaseStatusSignal[] refreshSignals;
     private final BaseStatusSignal[] driveMotorConnectedSignals;
-    private final EncodedMotorStatusSignalCache driveMotorStatusSignalCache;
-    private final BaseStatusSignal[] azimuthMotorConnectedSignals;
-    private final EncodedMotorStatusSignalCache azimuthMotorStatusSignalCache;
+	private final BaseStatusSignal[] azimuthMotorConnectedSignals;
     private final BaseStatusSignal[] azimuthEncoderConnectedSignals;
+
+    private final EncodedMotorStatusSignalCache driveMotorStatusSignalCache;
+    private final EncodedMotorStatusSignalCache azimuthMotorStatusSignalCache;
     private final EncoderStatusSignalCache azimuthEncoderStatusSignalCache;
 
     private final DoubleBuffer drivePositionBuffer;
@@ -58,7 +60,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final StaticBrake driveStaticBrakeRequest = new StaticBrake();
 
     private final VoltageOut azimuthVolts = new VoltageOut(0);
-    private final VelocityVoltage azimuthVelocity = new VelocityVoltage(0);
+    private final MotionMagicVoltage azimuthVelocity = new MotionMagicVoltage(0);
     private final NeutralOut azimuthNeutralOutRequest = new NeutralOut();
     private final CoastOut azimuthCoastOutRequest = new CoastOut();
     private final StaticBrake azimuthStaticBrakeRequest = new StaticBrake();
@@ -72,13 +74,18 @@ public class ModuleIOTalonFX implements ModuleIO {
             .withInverted(config.driveInverted)
             .withNeutralMode(NeutralModeValue.Brake)
         ;
-        this.azimuthConfig.MotorOutput
-            .withInverted(config.azimuthInverted)
-            .withNeutralMode(NeutralModeValue.Brake)
-        ;
+
+		this.driveConfig.ClosedLoopRamps
+			.withVoltageClosedLoopRampPeriod(Seconds.of(0.075))
+		;
 
         this.driveConfig.CurrentLimits
             .withSupplyCurrentLimitEnable(true)
+        ;
+
+		this.azimuthConfig.MotorOutput
+            .withInverted(false)
+            .withNeutralMode(NeutralModeValue.Brake)
         ;
         
         this.azimuthConfig.CurrentLimits
@@ -91,8 +98,21 @@ public class ModuleIOTalonFX implements ModuleIO {
         ;
 
         this.azimuthConfig.Feedback
-            .FeedbackRemoteSensorID(config.azimuthEncoderID.getDeviceID())
+            .withRemoteCANCoder(this.azimuthEncoder)
+			.withRotorToSensorRatio(DriveConstants.azimuthMotorToCarriageRatio)
+			.withSensorToMechanismRatio(DriveConstants.azimuthEncoderToCarriageRatio)
         ;
+
+		this.azimuthConfig.Slot0
+			.with
+
+		
+		this.encoder.getConfigurator().refresh(this.encoderConfig.MagnetSensor);
+
+		this.encoderConfig.MagnetSensor
+			.withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+			.with
+		;
 
         this.driveMotorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.driveMotor);
         this.azimuthMotorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.azimuthMotor);
@@ -140,7 +160,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         this.driveMotor.optimizeBusUtilization();
 
         this.drivePositionBuffer = OdometryThread.getInstance().registerPhoenixDoubleSignal(this.driveMotorStatusSignalCache.encoder().position(), Units::rotationsToRadians);
-        this.azimuthPositionBuffer = OdometryThread.getInstance().registerGenericDoubleSignal(this.azimuthEncoder::getAbsolutePosition, Units::rotationsToRadians);
+        this.azimuthPositionBuffer = OdometryThread.getInstance().registerPhoenixDoubleSignal(this.azimuthEncoderStatusSignalCache.position(), Units::rotationsToRadians);
     }
 
     @Override
