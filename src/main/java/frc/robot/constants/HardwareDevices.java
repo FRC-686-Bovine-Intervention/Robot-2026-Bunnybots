@@ -38,6 +38,10 @@ public class HardwareDevices {
 	public static final CANDevice backRightDriveMotorID = rio.id(4);
 	public static final CANDevice backRightAzimuthMotorID = rio.id(4);
 
+	// Elevator
+	public static final CANDevice elevatorMotorID = rio.id(7);
+	public static final CANDevice elevatorEncoderID = rio.id(7);
+
 	// Intake
 	// | Slam
 	public static final CANDevice intakeSlamMotorID = rio.id(5);
