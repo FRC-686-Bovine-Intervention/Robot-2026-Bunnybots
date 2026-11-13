@@ -121,14 +121,14 @@ window.addEventListener("load", () => {
 });
 
 const ovenCarrotsDOM = document.getElementById("ovenCarrots");
-const ovenCarrotsAddDOM = ovenCarrotsDOM.getElementById("add");
-const ovenCarrotsCounter = ovenCarrotsDOM.getElementById("counter");
-const ovenCarrotsSubtractDOM = ovenCarrotsDOM.getElementById("subtract");
+const ovenCarrotsAddDOM      = ovenCarrotsDOM.querySelector("#add");
+const ovenCarrotsCounter     = ovenCarrotsDOM.querySelector("#counter");
+const ovenCarrotsSubtractDOM = ovenCarrotsDOM.querySelector("#subtract");
 
-const ovenCakesDOM = document.getElementById("ovenCarrots");
-const ovenCakesAddDOM = ovenCakesDOM.getElementById("add");
-const ovenCakesCounter = ovenCakesDOM.getElementById("counter");
-const ovenCakesSubtractDOM = ovenCakesDOM.getElementById("subtract");
+const ovenCakesDOM = document.getElementById("ovenCakes");   // was "ovenCarrots"
+const ovenCakesAddDOM      = ovenCakesDOM.querySelector("#add");
+const ovenCakesCounter = ovenCakesDOM.querySelector("#counter");
+const ovenCakesSubtractDOM = ovenCakesDOM.querySelector("#subtract");
 
 const bakerModeDOM = document.getElementById("baker_mode");
 

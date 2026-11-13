@@ -55,23 +55,23 @@ public class MathExtraUtil {
 	}
 
 	/**
-     * Sorts both arrays a and b highest to lowest, the second array is the scores with the matching index to the first array
-     */
+	 * Sorts both arrays a and b highest to lowest, the second array is the scores with the matching index to the first array
+	 */
 	public static void downwardsInsertionSort(int[] a, int[] b) {
-	    for (int i = 1; i < b.length; i++) {
-	        int keyA = a[i];
-	        int keyB = b[i];
-	        int j = i - 1;
+		for (int i = 1; i < b.length; i++) {
+			int keyA = a[i];
+			int keyB = b[i];
+			int j = i - 1;
 
-	        while (j >= 0 && b[j] < keyB) {
-	            a[j + 1] = a[j];
-	            b[j + 1] = b[j];
-	            j--;
-	        }
+			while (j >= 0 && b[j] < keyB) {
+				a[j + 1] = a[j];
+				b[j + 1] = b[j];
+				j--;
+			}
 
-	        a[j + 1] = keyA;
-	        b[j + 1] = keyB;
-	    }
+			a[j + 1] = keyA;
+			b[j + 1] = keyB;
+		}
 	}
 
 	public static void moveValueToEnd(int[] a, int index) {
