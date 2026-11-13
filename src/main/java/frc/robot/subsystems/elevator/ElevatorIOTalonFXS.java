@@ -4,14 +4,14 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -27,8 +27,8 @@ import frc.util.loggerUtil.inputs.LoggedEncoder.EncoderStatusSignalCache;
 
 import java.util.Optional;
 
-public class ElevatorIOTalonFX implements ElevatorIO {
-	protected final TalonFX motor = HardwareDevices.elevatorMotorID.talonFX();
+public class ElevatorIOTalonFXS implements ElevatorIO {
+	protected final TalonFXS motor = HardwareDevices.elevatorMotorID.talonFXS();
 	protected final CANcoder cancoder = HardwareDevices.elevatorEncoderID.cancoder();
 
 	private final EncodedMotorStatusSignalCache motorStatusSignalCache;
@@ -42,7 +42,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
 	private double magnetOffsetRots = 0.0;
 
-	public ElevatorIOTalonFX() {
+	public ElevatorIOTalonFXS() {
 		var encoderConfig = new CANcoderConfiguration();
 		this.cancoder.getConfigurator().refresh(encoderConfig.MagnetSensor);
 		this.magnetOffsetRots = encoderConfig.MagnetSensor.MagnetOffset;
@@ -53,12 +53,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
 		this.cancoder.getConfigurator().apply(encoderConfig);
 
-		var motorConfig = new TalonFXConfiguration();
+		TalonFXSConfiguration motorConfig = new TalonFXSConfiguration();
 		motorConfig.MotorOutput
 			.withInverted(InvertedValue.Clockwise_Positive)
 			.withNeutralMode(NeutralModeValue.Brake)
 		;
-		motorConfig.Feedback
+		motorConfig.ExternalFeedback
 			.withRemoteCANcoder(this.cancoder)
 			.withRotorToSensorRatio(ElevatorConstants.motorToMechanism.then(ElevatorConstants.sensorToMechanism.inverse()).reductionUnsigned())
 			.withSensorToMechanismRatio(ElevatorConstants.sensorToMechanism.reductionUnsigned())
