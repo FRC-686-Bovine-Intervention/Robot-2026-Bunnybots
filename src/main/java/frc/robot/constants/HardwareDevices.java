@@ -27,17 +27,20 @@ public class HardwareDevices {
 	public static final CANDevice pigeonID = rio.id(0);
 	// | Front Left
 	public static final CANDevice frontLeftDriveMotorID = rio.id(1);
-	public static final CANDevice frontLeftAzimuthMotorID = rio.id(1);
+	public static final CANDevice frontLeftAzimuthMotorID = rio.id(5);
+	public static final CANDevice frontLeftAzimuthEncoderID = rio.id(1);
 	// | Front Right
 	public static final CANDevice frontRightDriveMotorID = rio.id(2);
-	public static final CANDevice frontRightAzimuthMotorID = rio.id(2);
+	public static final CANDevice frontRightAzimuthMotorID = rio.id(6);
+	public static final CANDevice frontRightAzimuthEncoderID = rio.id(2);
 	// | Back Left
 	public static final CANDevice backLeftDriveMotorID = rio.id(3);
-	public static final CANDevice backLeftAzimuthMotorID = rio.id(3);
+	public static final CANDevice backLeftAzimuthMotorID = rio.id(7);
+	public static final CANDevice backLeftAzimuthEncoderID = rio.id(3);
 	// | Back Right
 	public static final CANDevice backRightDriveMotorID = rio.id(4);
-	public static final CANDevice backRightAzimuthMotorID = rio.id(4);
-
+	public static final CANDevice backRightAzimuthMotorID = rio.id(8);
+	public static final CANDevice backRightAzimuthEncoderID = rio.id(4);
 	// Intake
 	// | Slam
 	public static final CANDevice intakeSlamMotorID = rio.id(5);
