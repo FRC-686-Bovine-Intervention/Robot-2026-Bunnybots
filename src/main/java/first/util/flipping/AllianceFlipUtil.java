@@ -1,7 +1,5 @@
 package first.util.flipping;
 
-import static org.wpilib.units.Units.Meters;
-
 
 import org.wpilib.driverstation.Alliance;
 import org.wpilib.driverstation.MatchState;
@@ -15,7 +13,6 @@ import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 
-import first.robot.constants.FieldConstants;
 import first.util.geometry.GeomUtil;
 
 public class AllianceFlipUtil {
@@ -32,7 +29,7 @@ public class AllianceFlipUtil {
 		CenterLineMirror,
 		XenterLineMirror,
 	}
-	public static final FieldFlipType defaultFlipType = FieldFlipType.CenterPointRotation;
+	public static final FieldFlipType defaultFlipType = FieldFlipType.CenterLineMirror;
 
 	public static <T extends AllianceFlippable<T>> T apply(T flippable) {
 		return AllianceFlipUtil.apply(flippable, defaultFlipType);
@@ -60,8 +57,8 @@ public class AllianceFlipUtil {
 	}
 	public static double flipXPosMeters(double xPosMeters, FieldFlipType flipType) {
 		return switch (flipType) {
-			case CenterPointRotation -> FieldConstants.fieldLength.in(Meters) - xPosMeters;
-			case CenterLineMirror    -> FieldConstants.fieldLength.in(Meters) - xPosMeters;
+			case CenterPointRotation -> - xPosMeters;
+			case CenterLineMirror    -> - xPosMeters;
 			case XenterLineMirror    -> xPosMeters;
 		};
 	}
@@ -77,9 +74,9 @@ public class AllianceFlipUtil {
 	}
 	public static double flipYPosMeters(double yPosMeters, FieldFlipType flipType) {
 		return switch (flipType) {
-			case CenterPointRotation -> FieldConstants.fieldWidth.in(Meters) - yPosMeters;
+			case CenterPointRotation -> - yPosMeters;
 			case CenterLineMirror    -> yPosMeters;
-			case XenterLineMirror    -> FieldConstants.fieldWidth.in(Meters) - yPosMeters;
+			case XenterLineMirror    -> - yPosMeters;
 		};
 	}
 
