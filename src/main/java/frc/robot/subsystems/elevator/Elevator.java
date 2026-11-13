@@ -36,17 +36,17 @@ public class Elevator extends SubsystemBase {
 	private final ElevatorIO io;
 	private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
-	private static final LoggedTunable<TrapezoidProfile.Constraints> profileConsts = LoggedTunable.fromDashboardUnits(
-		"Elevator/Profile",
-		InchesPerSecond,
-		InchesPerSecond.per(Second),
-		MetersPerSecond,
-		MetersPerSecondPerSecond,
-		new TrapezoidProfile.Constraints(
-			120,
-			240
-		)
-	);
+	// private static final LoggedTunable<TrapezoidProfile.Constraints> profileConsts = LoggedTunable.fromDashboardUnits(
+	// 	"Elevator/Profile",
+	// 	InchesPerSecond,
+	// 	InchesPerSecond.per(Second),
+	// 	MetersPerSecond,
+	// 	MetersPerSecondPerSecond,
+	// 	new TrapezoidProfile.Constraints(
+	// 		120,
+	// 		240
+	// 	)
+	// );
 
 	private static final LoggedTunable<FFConstants> ffConsts = LoggedTunable.from(
 		"Elevator/FF",
@@ -73,11 +73,11 @@ public class Elevator extends SubsystemBase {
 	private static final LoggedTunable<Time> autoRezeroDebounceTime = LoggedTunable.from("Elevator/Auto Rezero/Debounce Time", Seconds::of, 1);
 	private final Timer autoRezeroDebounceTimer = new Timer();
 
-	private TrapezoidProfile motionProfile = new TrapezoidProfile(profileConsts.get());
-	private final State measuredState = new State();
-	private final State setpointState = new State();
-	private final State goalState = new State();
-	private boolean motionProfiling = false;
+	// private TrapezoidProfile motionProfile = new TrapezoidProfile(profileConsts.get());
+	// private final State measuredState = new State();
+	// private final State setpointState = new State();
+	// private final State goalState = new State();
+	// private boolean motionProfiling = false;
 	private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0,0,0,0);
 
 	private double lengthMeters = 0.0;
@@ -85,7 +85,6 @@ public class Elevator extends SubsystemBase {
 
 	public final ExtenderMech stage2Mech = new ExtenderMech(ElevatorConstants.stage2Base);
 	public final ExtenderMech stage3Mech = new ExtenderMech(ElevatorConstants.stage3Base);
-	public final ExtenderMech stage4Mech = new ExtenderMech(ElevatorConstants.stage4Base);
 
 	private final Alert motorDisconnectedAlert = new Alert("Elevator/Alerts", "Motor Disconnected", AlertType.kError);
 	private final Alert encoderDisconnectedAlert = new Alert("Elevator/Alerts", "Encoder Disconnected", AlertType.kError);
@@ -112,19 +111,18 @@ public class Elevator extends SubsystemBase {
 		this.lengthMeters = stageDistMeters * ElevatorConstants.movingStageCount;
 		this.velocityMetersPerSec = ElevatorConstants.stage1LinearRelation.radiansToMeters(ElevatorConstants.sensorToMechanism.applyUnsigned(this.inputs.encoder.getVelocityRadsPerSec())) * ElevatorConstants.movingStageCount;
 
-		this.measuredState.position = this.getLengthMeters();
-		this.measuredState.velocity = this.getVelocityMetersPerSec();
+		// this.measuredState.position = this.getLengthMeters();
+		// this.measuredState.velocity = this.getVelocityMetersPerSec();
 
 		Logger.recordOutput("Elevator/Length/Measured", this.getLengthMeters());
 		Logger.recordOutput("Elevator/Velocity/Measured", this.getVelocityMetersPerSec());
 
 		this.stage2Mech.setMeters(stageDistMeters);
 		this.stage3Mech.setMeters(stageDistMeters);
-		this.stage4Mech.setMeters(stageDistMeters);
 
-		if (profileConsts.hasChanged(hashCode())) {
-			this.motionProfile = new TrapezoidProfile(profileConsts.get());
-		}
+		// if (profileConsts.hasChanged(hashCode())) {
+		// 	this.motionProfile = new TrapezoidProfile(profileConsts.get());
+		// }
 		if (ffConsts.hasChanged(hashCode())) {
 			ffConsts.get().update(this.feedforward);
 		}
@@ -168,11 +166,11 @@ public class Elevator extends SubsystemBase {
 	}
 
 	public void setVolts(double volts) {
-		this.motionProfiling = false;
+		// this.motionProfiling = false;
 		this.io.setVolts(volts);
 	}
 	public void stop(Optional<NeutralMode> neutralMode) {
-		this.motionProfiling = false;
+		// this.motionProfiling = false;
 		this.io.stop(neutralMode);
 	}
 	public Command stow() {
@@ -191,7 +189,7 @@ public class Elevator extends SubsystemBase {
 					elevator.io.setVolts(2);
 				} else {
 					var goalAngleRads = ElevatorConstants.motorToMechanism.inverse().applyUnsigned(ElevatorConstants.stage1LinearRelation.metersToRadians(goalLengthMeters));
-					elevator.io.setPosition(goalAngleRads, velocityMetersPerSec, lengthMeters);
+					elevator.io.setPosition(goalAngleRads, lengthMeters);
 				}
 			}
 
@@ -213,7 +211,7 @@ public class Elevator extends SubsystemBase {
 			public void initialize() {
 				elevator.io.stop(NeutralMode.COAST);
 			}
-			
+
 			@Override
 			public void end(boolean interrupted) {
 				elevator.io.stop(NeutralMode.DEFAULT);
@@ -237,7 +235,7 @@ public class Elevator extends SubsystemBase {
 			public void execute() {
 				var goalLengthMeters = lengthMetersSupplier.getAsDouble();
 				var goalAngleRads = ElevatorConstants.motorToMechanism.inverse().applyUnsigned(ElevatorConstants.stage1LinearRelation.metersToRadians(goalLengthMeters));
-				elevator.io.setPosition(goalAngleRads, velocityMetersPerSec, lengthMeters);
+				elevator.io.setPosition(goalAngleRads, lengthMeters);
 				Logger.recordOutput("Subsystems/Elevator/Elevator/Length/Goal", goalLengthMeters, Meters);
 			}
 

@@ -1,20 +1,25 @@
 package frc.robot.subsystems.elevator;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+
 import edu.wpi.first.math.util.Units;
 import frc.robot.constants.HardwareDevices;
 import frc.robot.constants.RobotConstants;
@@ -25,20 +30,21 @@ import frc.util.faults.DeviceFaults.FaultType;
 import frc.util.loggerUtil.inputs.LoggedEncodedMotor.EncodedMotorStatusSignalCache;
 import frc.util.loggerUtil.inputs.LoggedEncoder.EncoderStatusSignalCache;
 
-import java.util.Optional;
-
 public class ElevatorIOTalonFXS implements ElevatorIO {
 	protected final TalonFXS motor = HardwareDevices.elevatorMotorID.talonFXS();
+	protected final TalonFXS slaveMotor = HardwareDevices.elevatorMotorID.talonFXS();
 	protected final CANcoder cancoder = HardwareDevices.elevatorEncoderID.cancoder();
 
 	private final EncodedMotorStatusSignalCache motorStatusSignalCache;
+	private final EncodedMotorStatusSignalCache slaveMotorStatusSignalCache;
 	private final EncoderStatusSignalCache encoderStatusSignalCache;
 
 	private final VoltageOut voltageRequest = new VoltageOut(0);
-	private final PositionVoltage positionRequest = new PositionVoltage(0);
+	private final MotionMagicVoltage positionRequest = new MotionMagicVoltage(0);
 	private final NeutralOut neutralOutRequest = new NeutralOut();
 	private final CoastOut coastOutRequest = new CoastOut();
 	private final StaticBrake staticBrakeRequest = new StaticBrake();
+	private final StrictFollower followerRequest = new StrictFollower(0);
 
 	private double magnetOffsetRots = 0.0;
 
@@ -72,7 +78,14 @@ public class ElevatorIOTalonFXS implements ElevatorIO {
 
 		this.motor.getConfigurator().apply(motorConfig);
 
+		motorConfig.MotorOutput
+			.withInverted(InvertedValue.CounterClockwise_Positive)
+		;
+
+		this.slaveMotor.getConfigurator().apply(motorConfig);
+
 		this.motorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.motor);
+		this.slaveMotorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.slaveMotor);
 		this.encoderStatusSignalCache = EncoderStatusSignalCache.from(this.cancoder);
 
 		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.motorStatusSignalCache.encoder().getStatusSignals());
@@ -83,6 +96,7 @@ public class ElevatorIOTalonFXS implements ElevatorIO {
 		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.deviceFaultUpdateFrequency, FaultType.getFaultStatusSignals(this.cancoder));
 		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.deviceFaultUpdateFrequency, FaultType.getStickyFaultStatusSignals(this.cancoder));
 		this.motor.optimizeBusUtilization();
+		this.slaveMotor.optimizeBusUtilization();
 		this.cancoder.optimizeBusUtilization();
 	}
 
@@ -97,7 +111,14 @@ public class ElevatorIOTalonFXS implements ElevatorIO {
 			this.motorStatusSignalCache.motor().statorCurrent(),
 			this.motorStatusSignalCache.motor().supplyCurrent(),
 			this.motorStatusSignalCache.motor().torqueCurrent(),
-			this.motorStatusSignalCache.motor().deviceTemperature()
+			this.motorStatusSignalCache.motor().deviceTemperature(),
+			this.slaveMotorStatusSignalCache.encoder().position(),
+			this.slaveMotorStatusSignalCache.encoder().velocity(),
+			this.slaveMotorStatusSignalCache.motor().appliedVoltage(),
+			this.slaveMotorStatusSignalCache.motor().statorCurrent(),
+			this.slaveMotorStatusSignalCache.motor().supplyCurrent(),
+			this.slaveMotorStatusSignalCache.motor().torqueCurrent(),
+			this.slaveMotorStatusSignalCache.motor().deviceTemperature()
 		);
 		inputs.encoderConnected = BaseStatusSignal.isAllGood(
 			this.encoderStatusSignalCache.position(),
@@ -112,8 +133,18 @@ public class ElevatorIOTalonFXS implements ElevatorIO {
 			this.motorStatusSignalCache.motor().torqueCurrent(),
 			this.motorStatusSignalCache.motor().deviceTemperature()
 		);
+		inputs.slaveMotorConnected = BaseStatusSignal.isAllGood(
+			this.slaveMotorStatusSignalCache.encoder().position(),
+			this.slaveMotorStatusSignalCache.encoder().velocity(),
+			this.slaveMotorStatusSignalCache.motor().appliedVoltage(),
+			this.slaveMotorStatusSignalCache.motor().statorCurrent(),
+			this.slaveMotorStatusSignalCache.motor().supplyCurrent(),
+			this.slaveMotorStatusSignalCache.motor().torqueCurrent(),
+			this.slaveMotorStatusSignalCache.motor().deviceTemperature()
+		);
 		inputs.encoder.updateFrom(this.encoderStatusSignalCache);
 		inputs.motor.updateFrom(this.motorStatusSignalCache);
+		inputs.slaveMotor.updateFrom(this.slaveMotorStatusSignalCache);
 		// inputs.encoderFaults.updateFrom(this.cancoder);
 		// inputs.motorFaults.updateFrom(this.motor);
 		inputs.encoderMagnetOffsetRads = Units.rotationsToRadians(this.magnetOffsetRots);
@@ -124,21 +155,23 @@ public class ElevatorIOTalonFXS implements ElevatorIO {
 		this.motor.setControl(this.voltageRequest
 			.withOutput(volts)
 		);
+		this.slaveMotor.setControl(this.followerRequest.withLeaderID(this.motor.getDeviceID()));
 	}
 
 	@Override
-	public void setPosition(double positionRads, double velocityRadsPerSec, double feedforwardVolts) {
+	public void setPosition(double positionRads, double feedforwardVolts) {
 		this.motor.setControl(this.positionRequest
 			.withPosition(Units.radiansToRotations(positionRads))
-			.withVelocity(Units.radiansToRotations(velocityRadsPerSec))
 			.withFeedForward(feedforwardVolts)
 		);
+		this.slaveMotor.setControl(this.followerRequest.withLeaderID(this.motor.getDeviceID()));
 	}
 
 	@Override
 	public void stop(Optional<NeutralMode> neutralMode) {
 		var controlRequest = NeutralMode.selectControlRequest(neutralMode, this.neutralOutRequest, this.coastOutRequest, this.staticBrakeRequest);
 		this.motor.setControl(controlRequest);
+		this.slaveMotor.setControl(controlRequest);
 	}
 
 	@Override

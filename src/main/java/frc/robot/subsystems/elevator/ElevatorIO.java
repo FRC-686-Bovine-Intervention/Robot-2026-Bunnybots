@@ -14,10 +14,13 @@ public interface ElevatorIO {
 	public static class ElevatorIOInputs {
 		boolean encoderConnected = false;
 		boolean motorConnected = false;
+		boolean slaveMotorConnected = false;
 		LoggedEncoder encoder = new LoggedEncoder();
 		LoggedEncodedMotor motor = new LoggedEncodedMotor();
+		LoggedEncodedMotor slaveMotor = new LoggedEncodedMotor();
 		LoggedFaults encoderFaults = new LoggedFaults();
 		LoggedFaults motorFaults = new LoggedFaults();
+		LoggedFaults slaveMotorFaults = new LoggedFaults();
 		double encoderMagnetOffsetRads = 0.0;
 	}
 
@@ -25,7 +28,7 @@ public interface ElevatorIO {
 
 	public default void setVolts(double volts) {}
 
-	public default void setPosition(double positionRads, double velocityRadsPerSec, double feedforwardVolts) {}
+	public default void setPosition(double positionRads, double feedforwardVolts) {}
 
 	public default void stop(Optional<NeutralMode> neutralMode) {}
 
