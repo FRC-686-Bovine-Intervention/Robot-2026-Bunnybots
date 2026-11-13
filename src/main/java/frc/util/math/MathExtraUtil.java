@@ -53,4 +53,32 @@ public class MathExtraUtil {
 
 		return scalarMultiply(x, referenceLength/xLength);
 	}
+
+	/**
+     * Sorts both arrays a and b highest to lowest, the second array is the scores with the matching index to the first array
+     */
+	public static void downwardsInsertionSort(int[] a, int[] b) {
+	    for (int i = 1; i < b.length; i++) {
+	        int keyA = a[i];
+	        int keyB = b[i];
+	        int j = i - 1;
+
+	        while (j >= 0 && b[j] < keyB) {
+	            a[j + 1] = a[j];
+	            b[j + 1] = b[j];
+	            j--;
+	        }
+
+	        a[j + 1] = keyA;
+	        b[j + 1] = keyB;
+	    }
+	}
+
+	public static void moveValueToEnd(int[] a, int index) {
+		int targetToMove = a[index];
+		for (int i = index; i < a.length - 1; i++) {
+			a[i] = a[i + 1];
+		}
+		a[a.length - 1] = targetToMove;
+	}
 }
