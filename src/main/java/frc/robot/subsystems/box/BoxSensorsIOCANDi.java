@@ -1,4 +1,4 @@
-package frc.robot.subsystems.rollers;
+package frc.robot.subsystems.box;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -10,14 +10,14 @@ import com.ctre.phoenix6.signals.S2CloseStateValue;
 import com.ctre.phoenix6.signals.S2FloatStateValue;
 import frc.robot.constants.HardwareDevices;
 
-public class RollerSensorsIOCANDi implements RollerSensorsIO {
+public class BoxSensorsIOCANDi implements BoxSensorsIO {
 	private final CANdi candi = HardwareDevices.candiID.candi();
 
 	private final StatusSignal<Boolean> s2Signal;
 
 	private final BaseStatusSignal[] refreshSignals;
 
-	public RollerSensorsIOCANDi() {
+	public BoxSensorsIOCANDi() {
 		var config = new CANdiConfiguration();
 
 		config.DigitalInputs
@@ -37,9 +37,9 @@ public class RollerSensorsIOCANDi implements RollerSensorsIO {
 	}
 
 	@Override
-	public void updateInputs(RollerSensorsIOInputs inputs) {
+	public void updateInputs(BoxSensorsIOInputs inputs) {
 		BaseStatusSignal.refreshAll(this.refreshSignals);
 
-		inputs.kickerSensor = this.s2Signal.getValue();
+		inputs.ejectSensor = this.s2Signal.getValue();
 	}
 }

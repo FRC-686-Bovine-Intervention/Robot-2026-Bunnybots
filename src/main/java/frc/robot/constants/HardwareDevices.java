@@ -56,6 +56,10 @@ public class HardwareDevices {
 	public static final CANDevice leftFeederMotorID = rio.id(10);
 	public static final CANDevice rightFeederMotorID = rio.id(9);
 
+	// Box
+	public static final CANDevice boxEjectMotorID = rio.id(9);
+	public static final CANDevice boxFeedMotorID = rio.id(10);
+
 	// Shooter
 	// | Hood
 	public static final CANDevice hoodMotorID = rio.id(11);
