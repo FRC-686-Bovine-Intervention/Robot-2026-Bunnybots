@@ -40,7 +40,7 @@ public final class DriveConstants {
 		public final String name;
 		public final CANDevice driveMotorID;
 		public final CANDevice azimuthMotorID;
-        public final Optional<CANDevice> azimuthEncoderID;
+		public final Optional<CANDevice> azimuthEncoderID;
 		public final InvertedValue driveInverted;
 		public final Angle encoderZeroOffset;
 		public final Transform2d moduleTransform;
@@ -57,7 +57,7 @@ public final class DriveConstants {
 		}
 	}
 
-    public static final ModuleConstants[] moduleConstants = {
+	public static final ModuleConstants[] moduleConstants = {
 		new ModuleConstants(
 			"Front Left",
 			HardwareDevices.frontLeftDriveMotorID, HardwareDevices.frontLeftAzimuthMotorID, Optional.of(HardwareDevices.frontLeftAzimuthEncoderID),

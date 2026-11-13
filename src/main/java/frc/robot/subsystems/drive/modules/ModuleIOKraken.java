@@ -2,6 +2,8 @@ package frc.robot.subsystems.drive.modules;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -19,18 +21,17 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.util.Units;
 import frc.robot.constants.RobotConstants;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveConstants.ModuleConstants;
 import frc.robot.subsystems.drive.odometry.OdometryThread;
 import frc.robot.subsystems.drive.odometry.OdometryThread.DoubleBuffer;
-import frc.util.FFGains;
+import frc.util.NeutralMode;
 import frc.util.PIDGains;
 import frc.util.loggerUtil.inputs.LoggedEncodedMotor.EncodedMotorStatusSignalCache;
 import frc.util.loggerUtil.inputs.LoggedEncoder.EncoderStatusSignalCache;
 
 public class ModuleIOKraken implements ModuleIO {
-    protected final TalonFX driveMotor;
+	protected final TalonFX driveMotor;
 	protected final TalonFX azimuthMotor;
 	protected final CANcoder azimuthEncoder;
 
@@ -38,29 +39,29 @@ public class ModuleIOKraken implements ModuleIO {
 	private final TalonFXConfiguration azimuthConfig = new TalonFXConfiguration();
 	private final CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
 
-	 private final BaseStatusSignal[] refreshSignals;
-    private final BaseStatusSignal[] driveMotorConnectedSignals;
+	private final BaseStatusSignal[] refreshSignals;
+	private final BaseStatusSignal[] driveMotorConnectedSignals;
 	private final BaseStatusSignal[] azimuthMotorConnectedSignals;
-    private final BaseStatusSignal[] azimuthEncoderConnectedSignals;
+	private final BaseStatusSignal[] azimuthEncoderConnectedSignals;
 
-    private final EncodedMotorStatusSignalCache driveMotorStatusSignalCache;
-    private final EncodedMotorStatusSignalCache azimuthMotorStatusSignalCache;
-    private final EncoderStatusSignalCache azimuthEncoderStatusSignalCache;
+	private final EncodedMotorStatusSignalCache driveMotorStatusSignalCache;
+	private final EncodedMotorStatusSignalCache azimuthMotorStatusSignalCache;
+	private final EncoderStatusSignalCache azimuthEncoderStatusSignalCache;
 
 	private final DoubleBuffer drivePositionBuffer;
 	private final DoubleBuffer azimuthPositionBuffer;
 
 	private final VoltageOut driveVolts = new VoltageOut(0);
-    private final VelocityVoltage driveVelocity = new VelocityVoltage(0);
-    private final NeutralOut driveNeutralOutRequest = new NeutralOut();
-    private final CoastOut driveCoastOutRequest = new CoastOut();
-    private final StaticBrake driveStaticBrakeRequest = new StaticBrake();
+	private final VelocityVoltage driveVelocity = new VelocityVoltage(0);
+	private final NeutralOut driveNeutralOutRequest = new NeutralOut();
+	private final CoastOut driveCoastOutRequest = new CoastOut();
+	private final StaticBrake driveStaticBrakeRequest = new StaticBrake();
 
-    private final VoltageOut azimuthVolts = new VoltageOut(0);
-    private final MotionMagicVoltage azimuthVelocity = new MotionMagicVoltage(0);
-    private final NeutralOut azimuthNeutralOutRequest = new NeutralOut();
-    private final CoastOut azimuthCoastOutRequest = new CoastOut();
-    private final StaticBrake azimuthStaticBrakeRequest = new StaticBrake();
+	private final VoltageOut azimuthVolts = new VoltageOut(0);
+	private final MotionMagicVoltage azimuthPosition = new MotionMagicVoltage(0);
+	private final NeutralOut azimuthNeutralOutRequest = new NeutralOut();
+	private final CoastOut azimuthCoastOutRequest = new CoastOut();
+	private final StaticBrake azimuthStaticBrakeRequest = new StaticBrake();
 
 	public ModuleIOKraken(ModuleConstants config) {
 		this.driveMotor = config.driveMotorID.talonFX();
@@ -103,8 +104,8 @@ public class ModuleIOKraken implements ModuleIO {
 		;
 
 		this.driveMotorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.driveMotor);
-        this.azimuthMotorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.azimuthMotor);
-        this.azimuthEncoderStatusSignalCache = EncoderStatusSignalCache.from(this.azimuthEncoder);
+		this.azimuthMotorStatusSignalCache = EncodedMotorStatusSignalCache.from(this.azimuthMotor);
+		this.azimuthEncoderStatusSignalCache = EncoderStatusSignalCache.from(this.azimuthEncoder);
 		this.refreshSignals = new BaseStatusSignal[] {
 			this.driveMotorStatusSignalCache.encoder().position(),
 			this.driveMotorStatusSignalCache.encoder().velocity(),
@@ -132,34 +133,93 @@ public class ModuleIOKraken implements ModuleIO {
 			this.azimuthMotorStatusSignalCache.motor().torqueCurrent(),
 			this.azimuthMotorStatusSignalCache.motor().deviceTemperature(),
 		};
-        this.azimuthEncoderConnectedSignals = new BaseStatusSignal[] {
-            this.azimuthEncoderStatusSignalCache.position(),
-            this.azimuthEncoderStatusSignalCache.velocity(),
-        };
+		this.azimuthEncoderConnectedSignals = new BaseStatusSignal[] {
+			this.azimuthEncoderStatusSignalCache.position(),
+			this.azimuthEncoderStatusSignalCache.velocity(),
+		};
 
-        BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.driveMotorStatusSignalCache.encoder().getStatusSignals());
-        BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency.div(2), this.driveMotorStatusSignalCache.motor().getStatusSignals());
-        BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.azimuthMotorStatusSignalCache.encoder().getStatusSignals());
-        BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency.div(2), this.azimuthMotorStatusSignalCache.motor().getStatusSignals());
-        BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.azimuthEncoderStatusSignalCache.getStatusSignals());
+		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.driveMotorStatusSignalCache.encoder().getStatusSignals());
+		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency.div(2), this.driveMotorStatusSignalCache.motor().getStatusSignals());
+		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.azimuthMotorStatusSignalCache.encoder().getStatusSignals());
+		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency.div(2), this.azimuthMotorStatusSignalCache.motor().getStatusSignals());
+		BaseStatusSignal.setUpdateFrequencyForAll(RobotConstants.rioUpdateFrequency, this.azimuthEncoderStatusSignalCache.getStatusSignals());
 
-        BaseStatusSignal.setUpdateFrequencyForAll(DriveConstants.odometryLoopFrequency, this.driveMotorStatusSignalCache.encoder().position());
-        BaseStatusSignal.setUpdateFrequencyForAll(DriveConstants.odometryLoopFrequency, this.azimuthEncoderStatusSignalCache.position());
-        this.driveMotor.optimizeBusUtilization();
+		BaseStatusSignal.setUpdateFrequencyForAll(DriveConstants.odometryLoopFrequency, this.driveMotorStatusSignalCache.encoder().position());
+		BaseStatusSignal.setUpdateFrequencyForAll(DriveConstants.odometryLoopFrequency, this.azimuthEncoderStatusSignalCache.position());
+		this.driveMotor.optimizeBusUtilization();
 
-        this.drivePositionBuffer = OdometryThread.getInstance().registerPhoenixDoubleSignal(this.driveMotorStatusSignalCache.encoder().position(), Units::rotationsToRadians);
-        this.azimuthPositionBuffer = OdometryThread.getInstance().registerPhoenixDoubleSignal(this.azimuthEncoderStatusSignalCache.position(), Units::rotationsToRadians);
+		this.drivePositionBuffer = OdometryThread.getInstance().registerPhoenixDoubleSignal(this.driveMotorStatusSignalCache.encoder().position(), Units::rotationsToRadians);
+		this.azimuthPositionBuffer = OdometryThread.getInstance().registerPhoenixDoubleSignal(this.azimuthEncoderStatusSignalCache.position(), Units::rotationsToRadians);
 	}
 
+	@Override
+	public void updateInputs(ModuleIOInputs inputs) {
+		BaseStatusSignal.refreshAll(this.refreshSignals);
+		inputs.driveMotorConnected = BaseStatusSignal.isAllGood(this.driveMotorConnectedSignals);
+		inputs.azimuthMotorConnected = BaseStatusSignal.isAllGood(this.azimuthMotorConnectedSignals);
+		inputs.azimuthEncoderConnected = BaseStatusSignal.isAllGood(this.azimuthEncoderConnectedSignals);
+		inputs.driveMotor.updateFrom(this.driveMotorStatusSignalCache);
+		inputs.azimuthMotor.updateFrom(this.azimuthMotorStatusSignalCache);
+		inputs.azimuthEncoder.updateFrom(this.azimuthEncoderStatusSignalCache);
+
+		inputs.odometrySampleCount = this.drivePositionBuffer.getSize();
+		System.arraycopy(this.drivePositionBuffer.getInternalBuffer(), 0, inputs.odometryDriveRads, 0, inputs.odometrySampleCount);
+		System.arraycopy(this.azimuthPositionBuffer.getInternalBuffer(), 0, inputs.odometryAzimuthRads, 0, inputs.odometrySampleCount);
+		this.drivePositionBuffer.clear();
+		this.azimuthPositionBuffer.clear();
+	}
 
 	@Override
-	public void configFF(FFGains ffGains) {
-		ffGains.update(this.azimuthConfig.Slot0);
+	public void setDriveVolts(double volts) {
+		this.driveMotor.setControl(this.driveVolts.withOutput(volts));
+	}
+
+	@Override
+	public void setDriveVelocityRadPerSec(double velocityRadPerSec, double accelerationRadPerSecSqr, double feedforwardVolts, boolean overrideWithBrakeMode) {
+		this.driveMotor.setControl(this.driveVelocity
+			.withVelocity(Units.radiansToRotations(velocityRadPerSec))
+			.withAcceleration(Units.radiansToRotations(accelerationRadPerSecSqr))
+			.withFeedForward(feedforwardVolts)
+			.withOverrideBrakeDurNeutral(overrideWithBrakeMode)
+		);
+	}
+
+	@Override
+	public void setAzimuthVolts(double volts) {
+		this.azimuthMotor.setControl(this.azimuthVolts.withOutput(volts));
+	}
+
+	@Override
+	public void setAzimuthAngleRads(double angleRads, double feedforwardVolts) {
+		this.azimuthMotor.setControl(this.azimuthPosition
+			.withPosition(Units.radiansToRotations(angleRads))
+			.withFeedForward(feedforwardVolts)
+		);
+	}
+
+	@Override
+	public void stopDrive(Optional<NeutralMode> neutralMode) {
+		this.driveMotor.setControl(NeutralMode.selectControlRequest(neutralMode, azimuthNeutralOutRequest, azimuthCoastOutRequest, azimuthStaticBrakeRequest));
+	}
+
+	@Override
+	public void stopAzimuth(Optional<NeutralMode> neutralMode) {
+		this.azimuthMotor.setControl(NeutralMode.selectControlRequest(neutralMode, azimuthNeutralOutRequest, azimuthCoastOutRequest, azimuthStaticBrakeRequest));
 	}
 
 	@Override
 	public void configAzimuthPID(PIDGains pidGains) {
 		pidGains.update(this.azimuthConfig.Slot0);
+	}
+
+	@Override
+	public void configDrivePID(PIDGains pidGains) {
+		pidGains.update(this.driveConfig.Slot0);
+	}
+
+	@Override
+	public void configSendDrive() {
+		this.driveMotor.getConfigurator().apply(this.driveConfig);
 	}
 
 	@Override
