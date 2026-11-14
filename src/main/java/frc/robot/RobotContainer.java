@@ -17,7 +17,6 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
@@ -34,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import frc.robot.auto.AutoManager;
 import frc.robot.auto.AutoSelector;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.RobotConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
@@ -47,6 +45,8 @@ import frc.robot.subsystems.drive.modules.ModuleIOSim;
 import frc.robot.subsystems.drive.odometry.OdometryTimestampIO;
 import frc.robot.subsystems.drive.odometry.OdometryTimestampIOOdometryThread;
 import frc.robot.subsystems.drive.odometry.OdometryTimestampIOSim;
+import frc.robot.subsystems.objectiveTracker.ObjectiveTracker;
+import frc.robot.subsystems.objectiveTracker.ShelfTrackerIOServer;
 import frc.robot.subsystems.vision.apriltag.ApriltagVision;
 import frc.robot.subsystems.vision.object.ObjectVision;
 import frc.util.EdgeDetector;
@@ -76,6 +76,8 @@ public class RobotContainer {
 
 	// Auto
 	public final AutoManager autoManager;
+
+	public final ObjectiveTracker objectiveTracker;
 
 	// Event Loops
 	public final EventLoop automationsLoop = new EventLoop();
@@ -133,6 +135,8 @@ public class RobotContainer {
 		this.objectVision = new ObjectVision(
 
 		);
+
+		this.objectiveTracker = new ObjectiveTracker(new ShelfTrackerIOServer());
 
 		// Setup robot structure
 		// this.drive.structureRoot
@@ -502,8 +506,8 @@ public class RobotContainer {
 		// this.automationsLoop.bind(new AutoDriveAim(this.drive, this.shooter, intakeRollersIntakeCommand));
 
 		// Setup position reset command
-		this.driveController.leftStickButton().and(this.driveController.rightStickButton()).onTrue(Commands.runOnce(() -> RobotState.getInstance().resetPose(FieldConstants.hubIntakeFrontRobotPose.getOurs())).ignoringDisable(true));
-		this.driveController.rightStickButton().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetPose(new Pose2d(FieldConstants.hubIntakeFrontRobotPose.getOurs().getTranslation(), RobotState.getInstance().getEstimatedGlobalPose().getRotation()))).ignoringDisable(true));
+		// this.driveController.leftStickButton().and(this.driveController.rightStickButton()).onTrue(Commands.runOnce(() -> RobotState.getInstance().resetPose(FieldConstants.hubIntakeFrontRobotPose.getOurs())).ignoringDisable(true));
+		// this.driveController.rightStickButton().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetPose(new Pose2d(FieldConstants.hubIntakeFrontRobotPose.getOurs().getTranslation(), RobotState.getInstance().getEstimatedGlobalPose().getRotation()))).ignoringDisable(true));
 		/*
 		 * (A)
 		 *  | Press: Deploy intake (if not deployed) and roll in
