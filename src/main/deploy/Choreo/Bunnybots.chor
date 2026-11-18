@@ -265,7 +265,7 @@
      "val":0.0
     }
    },
-   "OvenStartingPose":{
+   "OvenScoringPose":{
     "x":{
      "exp":"CenterToBumper",
      "val":0.473075
@@ -279,7 +279,7 @@
      "val":-1.5707963267948966
     }
    },
-   "ShelfStartingPose":{
+   "ShelfScoringPose":{
     "x":{
      "exp":"CenterToBumper",
      "val":0.473075
