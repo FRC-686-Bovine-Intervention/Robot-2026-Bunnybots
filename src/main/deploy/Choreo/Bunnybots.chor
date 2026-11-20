@@ -116,6 +116,20 @@
      "val":2.34315
     }
    },
+   "OvenToWall":{
+    "dimension":"Length",
+    "var":{
+     "exp":"3 in",
+     "val":0.07619999999999999
+    }
+   },
+   "OvenWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"30 in",
+     "val":0.762
+    }
+   },
    "PrestagedCarrotsLineLength":{
     "dimension":"Length",
     "var":{
@@ -150,6 +164,20 @@
      "exp":"7 in",
      "val":0.1778
     }
+   },
+   "ShelfToWall":{
+    "dimension":"Length",
+    "var":{
+     "exp":"12 in",
+     "val":0.30479999999999996
+    }
+   },
+   "ShelfWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"97 in",
+     "val":2.4638
+    }
    }
   },
   "poses":{
@@ -163,8 +191,8 @@
      "val":1.9812
     },
     "heading":{
-     "exp":"0 rad",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "CarrotFourPose":{
@@ -177,8 +205,8 @@
      "val":3.048
     },
     "heading":{
-     "exp":"0 rad",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "CarrotOnePose":{
@@ -191,8 +219,8 @@
      "val":6.248399999999999
     },
     "heading":{
-     "exp":"0 rad",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "CarrotThreePose":{
@@ -205,8 +233,8 @@
      "val":4.1148
     },
     "heading":{
-     "exp":"0 rad",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "CarrotTwoPose":{
@@ -219,8 +247,8 @@
      "val":5.1815999999999995
     },
     "heading":{
-     "exp":"0 rad",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "CenterKitchenLineStartingPose":{
@@ -233,8 +261,8 @@
      "val":4.915293699999999
     },
     "heading":{
-     "exp":"0 deg",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "OvenKitchenLineAvoid":{
@@ -247,8 +275,8 @@
      "val":3.2424624000000004
     },
     "heading":{
-     "exp":"0 rad",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "OvenKitchenLineStartingPose":{
@@ -261,14 +289,14 @@
      "val":3.1662624000000004
     },
     "heading":{
-     "exp":"0 deg",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    },
    "OvenScoringPose":{
     "x":{
-     "exp":"CenterToBumper",
-     "val":0.473075
+     "exp":"OvenToWall + OvenWidth / 2",
+     "val":0.4572
     },
     "y":{
      "exp":"KitchenLowerY + CenterToBumper",
@@ -281,8 +309,8 @@
    },
    "ShelfScoringPose":{
     "x":{
-     "exp":"CenterToBumper",
-     "val":0.473075
+     "exp":"ShelfToWall + ShelfWidth / 2",
+     "val":1.5367
     },
     "y":{
      "exp":"FieldWidth - ShelfThickness - CenterToBumper",
@@ -303,8 +331,8 @@
      "val":6.664325
     },
     "heading":{
-     "exp":"0 deg",
-     "val":0.0
+     "exp":"180 deg",
+     "val":3.141592653589793
     }
    }
   }
