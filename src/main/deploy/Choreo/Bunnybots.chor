@@ -84,7 +84,7 @@
    "InnerKitchenLineLength":{
     "dimension":"Length",
     "var":{
-     "exp":"FieldWidth - KitchenLowerY - OuterKitchenExtension",
+     "exp":"FieldWidth - KitchenLowerY - OuterKitchenExtensionWidth",
      "val":4.444212599999999
     }
    },
@@ -102,7 +102,14 @@
      "val":2.6931874
     }
    },
-   "OuterKitchenExtension":{
+   "OuterKitchenExtensionLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"125 in",
+     "val":3.175
+    }
+   },
+   "OuterKitchenExtensionWidth":{
     "dimension":"Length",
     "var":{
      "exp":"43 in",
@@ -177,6 +184,13 @@
     "var":{
      "exp":"97 in",
      "val":2.4638
+    }
+   },
+   "TapeWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"2 in",
+     "val":0.0508
     }
    }
   },
@@ -293,6 +307,20 @@
      "val":3.141592653589793
     }
    },
+   "OvenScoringLeavePose":{
+    "x":{
+     "exp":"InnerKitchenLineToWall + TapeWidth + CenterToBumper",
+     "val":2.441575
+    },
+    "y":{
+     "exp":"KitchenLowerY + CenterToBumper",
+     "val":3.1662624000000004
+    },
+    "heading":{
+     "exp":"-90 deg",
+     "val":-1.5707963267948966
+    }
+   },
    "OvenScoringPose":{
     "x":{
      "exp":"OvenToWall + OvenWidth / 2",
@@ -305,6 +333,20 @@
     "heading":{
      "exp":"-90 deg",
      "val":-1.5707963267948966
+    }
+   },
+   "ShelfScoringLeavePose":{
+    "x":{
+     "exp":"OuterKitchenExtensionLength + TapeWidth + CenterToBumper",
+     "val":3.698875
+    },
+    "y":{
+     "exp":"FieldWidth - ShelfThickness - CenterToBumper",
+     "val":7.578725
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
     }
    },
    "ShelfScoringPose":{
