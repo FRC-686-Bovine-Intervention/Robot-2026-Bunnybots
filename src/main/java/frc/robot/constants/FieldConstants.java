@@ -46,6 +46,18 @@ public final class FieldConstants {
 	public static final Distance prestagedCarrotsLowerY = Inches.of(75);
 	public static final Distance prestagedCarrotsLineLength = fieldWidth.minus(prestagedCarrotsLowerY).minus(prestagedCarrotsLowerY);
 
+	public static final Distance rampLength = Inches.of(90.75);
+	public static final Distance rampWidth = Inches.of(24);
+	public static final Distance rampHeight = Inches.of(23.167);
+
+
+	public static final Distance depotLength = Inches.of(5);
+	public static final Distance depotWidth = Inches.of(27);
+	public static final Distance depotHeight = Inches.of(32.49);
+
+	
+
+
 	public static final Distance carrotFourLowerY = Inches.of(111);
 	public static final Distance carrotFiveCenterY = prestagedCarrotsLowerY.plus(carrotDiameter.div(2));
 	public static final Distance carrotFourCenterY = carrotFourLowerY.plus(carrotLength.div(2));
