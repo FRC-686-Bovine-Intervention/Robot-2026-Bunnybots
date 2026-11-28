@@ -1,5 +1,5 @@
 {
- "name":"ShelfToLeave",
+ "name":"ShelfP3ToLeave",
  "version":3,
  "snapshot":{
   "waypoints":[
@@ -13,7 +13,7 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"ShelfScoringPose.x", "val":1.5367}, "y":{"exp":"ShelfScoringPose.y", "val":7.578725}, "heading":{"exp":"ShelfScoringPose.heading", "val":1.5707963267948966}, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"ShelfScoringPoseP3.x", "val":1.5367}, "y":{"exp":"ShelfScoringPoseP3.y", "val":7.578725}, "heading":{"exp":"ShelfScoringPoseP3.heading", "val":1.5707963267948966}, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"ShelfScoringLeavePose.x", "val":3.698875}, "y":{"exp":"ShelfScoringLeavePose.y", "val":7.578725}, "heading":{"exp":"ShelfScoringLeavePose.heading", "val":1.5707963267948966}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},

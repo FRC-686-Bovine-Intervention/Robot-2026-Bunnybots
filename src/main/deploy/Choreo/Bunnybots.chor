@@ -349,13 +349,69 @@
      "val":1.5707963267948966
     }
    },
-   "ShelfScoringPose":{
+   "ShelfScoringPoseP1":{
+    "x":{
+     "exp":"ShelfScoringPoseP3.x - 36 in",
+     "val":0.6223
+    },
+    "y":{
+     "exp":"ShelfScoringPoseP3.y",
+     "val":7.578725
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
+    }
+   },
+   "ShelfScoringPoseP2":{
+    "x":{
+     "exp":"ShelfScoringPoseP3.x - 18 in",
+     "val":1.0795
+    },
+    "y":{
+     "exp":"ShelfScoringPoseP3.y",
+     "val":7.578725
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
+    }
+   },
+   "ShelfScoringPoseP3":{
     "x":{
      "exp":"ShelfToWall + ShelfWidth / 2",
      "val":1.5367
     },
     "y":{
      "exp":"FieldWidth - ShelfThickness - CenterToBumper",
+     "val":7.578725
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
+    }
+   },
+   "ShelfScoringPoseP4":{
+    "x":{
+     "exp":"ShelfScoringPoseP3.x + 18 in",
+     "val":1.9939
+    },
+    "y":{
+     "exp":"ShelfScoringPoseP3.y",
+     "val":7.578725
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
+    }
+   },
+   "ShelfScoringPoseP5":{
+    "x":{
+     "exp":"ShelfScoringPoseP3.x + 36 in",
+     "val":2.4511
+    },
+    "y":{
+     "exp":"ShelfScoringPoseP3.y",
      "val":7.578725
     },
     "heading":{
